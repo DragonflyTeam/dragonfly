@@ -61,9 +61,9 @@ for i=1:LnFl
     %    and *.txt files.
     
     nC1 = strfind(NewFileList{i}, '.log');
-    nC2 = strfind(NewFileList{i}, '.txt');
+    % nC2 = strfind(NewFileList{i}, '.txt');
     
-    if (~isempty(nC1) || ~isempty(nC2))
+    if (~isempty(nC1)) % || ~isempty(nC2))
         continue
     end
     

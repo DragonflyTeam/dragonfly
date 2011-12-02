@@ -42,7 +42,7 @@ diary( ['slaveParallel_',int2str(whoiam),'.log']);
 
 
 % Configure dynare environment
-dynareroot = dynare_config();
+% dynareroot = dynare_config();
 
 % Load input data.
 load( ['slaveParallel_input',int2str(whoiam)]);

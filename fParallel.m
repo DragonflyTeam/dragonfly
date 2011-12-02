@@ -46,7 +46,7 @@ delete( [fname,'_',int2str(whoiam),'.log']);
 diary( [fname,'_',int2str(whoiam),'.log']);
 
 % Configure dynare environment.
-dynareroot = dynare_config();
+% dynareroot = dynare_config();
 
 % Load input data.
 load( [fname,'_input'])

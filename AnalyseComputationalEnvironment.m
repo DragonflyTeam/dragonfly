@@ -68,7 +68,7 @@ dynareParallelMkDir(RemoteTmpFolder,DataInput);
 %               no permissions to execute a Matlab session. Or simply
 %               Matlab path (MatlabOctavePath) is incorrect!
 %
-%   Value 8:    Dynare path (DynarePath) is incorrect!
+%   Value 8:    Program path (ProgramPath) is incorrect!
 %
 %   Value 9:    It is impossible delete remote computational temporary files!
 %
@@ -109,13 +109,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     OScallerUnix=~ispc;
     OScallerWindows=ispc;
     OStargetUnix=strcmpi('unix',DataInput(Node).OperatingSystem);
-    if isempty(DataInput(Node).OperatingSystem),
-        OStargetUnix=OScallerUnix;
-    end
     OStargetWindows=strcmpi('windows',DataInput(Node).OperatingSystem);
-    if isempty(DataInput(Node).OperatingSystem),
-        OStargetWindows=OScallerWindows;
-    end
     
     Environment= (OScallerUnix || OStargetUnix);
     
@@ -353,7 +347,6 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             
         end
         
-        
         % Now we verify if it possible to exchange data with the remote
         % computer:
         
@@ -363,8 +356,8 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         fid = fopen('Tracing.m', 'w+');
         s1=(['fT = fopen(''MatlabOctaveIsOk.txt'',''w+'');\n']);
         s2='fclose(fT);\n';
-        SBS=strfind(DataInput(Node).DynarePath,'\');
-        DPStr=DataInput(Node).DynarePath;
+        SBS=strfind(DataInput(Node).ProgramPath,'\');
+        DPStr=DataInput(Node).ProgramPath;
         if isempty(SBS),
             DPStrNew=DPStr;
         else
@@ -374,15 +367,22 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             end
             DPStrNew=[DPStrNew,DPStr(SBS(end)+1:end)];
         end
+        s31=['lastwarn('''');\n'];
         s3=['addpath(''',DPStrNew,'''),\n'];
-        s4=['try,\n  dynareroot = dynare_config();\n'];
-        s41=(['  fT = fopen(''DynareIsOk.txt'',''w+'');\n']);
+        s32=['az=lastwarn;\n'];
+        s33=['if isempty(az);\n'];
+        s34=(['  fT = fopen(''AddpathIsOk.txt'',''w+'');\n']);
+        s35='  fclose(fT);\n';
+        s36=(['else,  fT = fopen(''AddpathFailed.txt'',''w+'');\n']);
+        s37='  fclose(fT); end,\n';
+        s4=['try,\n  ',DataInput(Node).ProgramConfig,';\n'];
+        s41=(['  fT = fopen(''ProgramIsOk.txt'',''w+'');\n']);
         s42='  fclose(fT);\n';
         s5=['catch,end,\n'];
-        s51=(['  fT = fopen(''DynareFailed.txt'',''w+'');\n']);
+        s51=(['  fT = fopen(''ProgramFailed.txt'',''w+'');\n']);
         s52='  fclose(fT);\n';
         send='exit';
-        StrCommand=([s1,s2,s3,s4,s41,s42,s5,s51,s52,send]);
+        StrCommand=([s1,s2,s31,s3,s32,s33,s34,s35,s36,s37,s4,s41,s42,s5,s51,s52,send]);
         
         % Mettere controllo su NbW ...
         % if exist('OCTAVE_VERSION')
@@ -395,7 +395,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         dynareParallelSendFiles('Tracing.m', RemoteTmpFolder,DataInput(Node));
         FindTracing = dynareParallelDir('Tracing.m', RemoteTmpFolder,DataInput(Node));
         
-        delete ('Tracing.m');
+        delete('Tracing.m');
         
         if (isempty(FindTracing))
             disp ('It is impossible to exchange data with Remote Drive and/or Remote Directory! ErrorCode 6.');
@@ -420,13 +420,13 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             if strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                 system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' Tracing.m;" &']);
             else
-                system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -nodesktop -minimize -r Tracing;" &']);
+                system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -Nodesktop -minimize -r Tracing;" &']);
             end
         else
             if  strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                 [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' Tracing.m']);
             else
-                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -nodesktop -minimize -r Tracing']);
+                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -Nodesktop -minimize -r Tracing']);
             end
         end
         
@@ -478,19 +478,19 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             disp(' ');
             
             % Now we verify if the DynarePath is correct ...
-            disp('Check the Dynare path on remote machine ... ');
+            disp('Check the Program path on remote machine ... ');
             disp(' ');
             disp('please wait ... ');
             disp(' ');
             pause(2)
             
-            if isempty(dynareParallelDir('DynareIsOk.txt',RemoteTmpFolder,DataInput(Node)))
+            if isempty(dynareParallelDir('AddpathIsOk.txt',RemoteTmpFolder,DataInput(Node)))
                 ErrorCode=8;
             end
             
             if  (ErrorCode==8)
                 
-                disp ('The DynarePath is incorrect!');
+                disp ('The ProgramPath is incorrect!');
                 disp(' ');
                 disp('ErrorCode 8.');
                 disp(' ');
@@ -500,9 +500,29 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
                 return
                 
             else
-                disp('Check on Dynare Path remote machine ..... Ok!');
+                disp('Check on Program Path remote machine ..... Ok!');
                 disp(' ');
                 disp(' ');
+                if isempty(dynareParallelDir('ProgramIsOk.txt',RemoteTmpFolder,DataInput(Node)))
+                    ErrorCode=8.1;
+                end
+                
+                if  (ErrorCode==8.1)
+                    
+                    disp ('The ProgramConfig failed!');
+                    disp(' ');
+                    disp('ErrorCode 8.1');
+                    disp(' ');
+                    disp(' ');
+                    ErrorCode=8.1;
+                    dynareParallelRmDir(RemoteTmpFolder,DataInput(Node));
+                    return
+                    
+                else
+                    disp('Check on ProgramConfig on remote machine ..... Ok!');
+                    disp(' ');
+                    disp(' ');
+                end
             end
         end
         
@@ -559,6 +579,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     si0=[];
     de0=[];
     
+    disp('Checking Hardware please wait ...');
     if (DataInput(Node).Local == 1)
         if Environment,
             [si0 de0]=system('grep processor /proc/cpuinfo');
@@ -567,11 +588,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         end
     else
         if Environment,
-            if OStargetUnix,
-                [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
-            else
-                [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' psinfo']);
-            end
+            [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
         else
             [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName,' -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password]);
         end
@@ -579,14 +596,13 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     
     
     RealCPUnbr='';
-    keyboard;
-    RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
+    RealCPUnbr=GiveCPUnumber(de0);
     
     % Questo controllo penso che si possa MIGLIORARE!!!!!
     if  isempty (RealCPUnbr) && Environment==0,
         [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName]);
     end        
-    RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
+    RealCPUnbr=GiveCPUnumber(de0);
 
     if  isempty (RealCPUnbr)
         % An error occurred when we try to know the Cpu/Cores
