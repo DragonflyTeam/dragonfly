@@ -145,7 +145,7 @@ for i=1:nC
     % Many choices are possible:
     % - ... (see above).
      
-    JobAssignedCpu=floor(JobsForNode(i)/nCPUoriginal(i));
+    JobAssignedCpu=max(1,floor(JobsForNode(i)/nCPUoriginal(i)));
     
     ChekOverFlow=0;
     
