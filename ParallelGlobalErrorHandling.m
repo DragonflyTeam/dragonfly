@@ -18,94 +18,110 @@ Reaction=0;
 switch ErrorCode
     
     case 0
-        display(' ');
-        display('Unknow Parser Error in Cluster configuration file!');
-        display('Please inform us of this kind of errror!');
-        display(' ');
+        disp(' ');
+        disp('Unknow Parser Error in Cluster configuration file!');
+        disp('Please inform us of this kind of errror!');
+        disp(' ');
         
     case 1
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display('Please type, for example, the following text:');
-        display(' ');
-        display('[cluster]');
-        display('Name = Jaguar');
-        display('Members = ni(xi) nj(xj) ... ');
-        display(' ');
-        display('[node]');
-        display('Name = ni(xi)');
-        display(' ... ');
-        display('Name = nj(xj)');
-        display(' ... ');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp('Please type, for example, the following text:');
+        disp(' ');
+        disp('[cluster]');
+        disp('Name = Jaguar');
+        disp('Members = ni(xi) nj(xj) ... ');
+        disp(' ');
+        disp('[node]');
+        disp('Name = ni(xi)');
+        disp(' ... ');
+        disp('Name = nj(xj)');
+        disp(' ... ');
+        disp(' ');
         
     case 2
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display('Cluster Name Not Found!');
-        display(' ');
-        display('The Variable Cluster Name in ParallelParser function,');
-        display('must be defined in a Configuration File!');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp('Cluster Name Not Found!');
+        disp(' ');
+        disp('The Variable Cluster Name in ParallelParser function,');
+        disp('must be defined in a Configuration File!');
+        disp(' ');
         
     case 3
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display('Node Name Not Found!');
-        display(' ');
-        display('The Node Name, must be placed ');
-        display('in Cluster but and also Nodes definition!');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp('Node Name Not Found!');
+        disp(' ');
+        disp('The Node Name, must be placed ');
+        disp('in Cluster but and also Nodes definition!');
+        disp(' ');
         
     case 4
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display('Error in Members Weight');
-        display(' ');
-        display('Please type, for example: ');
-        display('n n2 n3 n4');
-        display('or');
-        display('n(3) n2(2) n3(1) n4(2)');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp('Error in Members Weight');
+        disp(' ');
+        disp('Please type, for example: ');
+        disp('n n2 n3 n4');
+        disp('or');
+        disp('n(3) n2(2) n3(1) n4(2)');
+        disp(' ');
         
     case 5
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display(' ');
-        display('The field CPUnbr is Mandatory!');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp(' ');
+        disp('The field CPUnbr is Mandatory!');
+        disp(' ');
         
     case 6
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display(' ');
-        display('The field ComputerName is Mandatory!');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp(' ');
+        disp('The field ComputerName is Mandatory!');
+        disp(' ');
         
     case 7
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display(' ');
-        display('Some fields Mandatory for Windows OS are missing!');
-        display('Please check the fields: UserName, Password, RemoteDrive and RemoteDirectory!');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp(' ');
+        disp('Some fields Mandatory for Windows OS are missing!');
+        disp('Please check the fields: UserName, Password, RemoteDrive and RemoteDirectory!');
+        disp(' ');
         
     case 8
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display('Error in CPU Numbers');
-        display(' ');
-        display('Please type, for example: ');
-        display('n (n>0)');
-        display('or');
-        display('[1:n]');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp('Error in CPU Numbers');
+        disp(' ');
+        disp('Please type, for example: ');
+        disp('n (n>0)');
+        disp('or');
+        disp('[m:n] (m<n)');
+        disp(' ');
         
     case 9
-        display(' ');
-        display('Error in Cluster configuration file!');
-        display(' ');
-        display('Some fields Mandatory for Like Unix OS are missing!');
-        display('Please check the fields: UserName, and RemoteDirectory!');
-        display(' ');
+        disp(' ');
+        disp('Error in Cluster configuration file!');
+        disp(' ');
+        disp('Some fields Mandatory for Like Unix OS are missing!');
+        disp('Please check the fields: UserName, and RemoteDirectory!');
+        disp(' ');
+        
+    case 10
+        disp(' ');
+        disp('Generic Error!');
+        disp(' ');
+        disp('Error opening Cluster Configuration File!');
+        disp('Probably the file Name/Path do not exist!');
+        disp(' ');
+        
+    case 11
+        disp(' ');
+        disp('Error in MatlabOctavePath field!');
+        disp(' ');
+        disp('This fiel must be containt the string "matlab" or "octave"?!');
+        disp('Please check it!');
+        disp(' ');
 end
