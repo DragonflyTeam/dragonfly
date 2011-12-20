@@ -81,20 +81,33 @@ try,
         % Save the output result.
         save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
     end
+    if isfield(fOutputVar,'CloseAllSlaves'),
+        CloseAllSlaves = 1;
+        fOutputVar = rmfield(fOutputVar,'CloseAllSlaves');
+        save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+        save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
+    end
     
     disp(['fParallel ',int2str(whoiam),' completed.'])
 catch,
-    disp(['fParallel ',int2str(whoiam),' crashed.'])
-    fOutputVar.error = lasterror;
-    save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
-    waitbarString = fOutputVar.error.message;
-    %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).ComputerName];
-    if Parallel(ThisMatlab).Local,
-        waitbarTitle='Local ';
+    theerror = lasterror;
+    if strfind(theerror.message,'Master asked to break the job')
+        fOutputVar.message = theerror;
+        save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+        waitbarString = theerror.message;
     else
-        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
+        disp(['fParallel ',int2str(whoiam),' crashed.'])
+        fOutputVar.error = theerror;
+        save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+        waitbarString = theerror.message;
+        %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).ComputerName];
+        if Parallel(ThisMatlab).Local,
+            waitbarTitle='Local ';
+        else
+            waitbarTitle=[Parallel(ThisMatlab).ComputerName];
+        end
+        fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     end
-    fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     
 end
 diary off;

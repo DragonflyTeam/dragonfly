@@ -136,6 +136,13 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
 
                 % Save the output result.
                 save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
+%                 keyboard,
+                if isfield(fOutputVar,'CloseAllSlaves'),
+                    CloseAllSlaves = 1;
+                    fOutputVar = rmfield(fOutputVar,'CloseAllSlaves');
+                    save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+                    save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
+                end
 
                 % Inform the master that the job is finished, and transfer the output data
                 delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
@@ -143,19 +150,27 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
 
             disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.']);
             t0 =clock; % Re-set waiting time of 20 mins
-        catch ME
-            disp(['Job ',fname,' on CPU ',int2str(whoiam),' crashed.']);
-            fOutputVar.error = ME;
-            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
-            waitbarString = fOutputVar.error.message;
-            if Parallel(ThisMatlab).Local,
-                waitbarTitle='Local ';
+        catch,
+            theerror = lasterror;
+            if strfind(theerror.message,'Master asked to break the job')
+                disp(['Job ',fname,' on CPU ',int2str(whoiam),' broken from master.']);
+                fOutputVar.message = theerror;
+                save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+                delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
             else
-                waitbarTitle=[Parallel(ThisMatlab).ComputerName];
+                disp(['Job ',fname,' on CPU ',int2str(whoiam),' crashed.']);
+                fOutputVar.error = lasterror;
+                save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
+                waitbarString = fOutputVar.error.message;
+                if Parallel(ThisMatlab).Local,
+                    waitbarTitle='Local ';
+                else
+                    waitbarTitle=[Parallel(ThisMatlab).ComputerName];
+                end
+                fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+                delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
+                break
             end
-            fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
-            delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-            break
             
         end
     end

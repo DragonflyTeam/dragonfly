@@ -141,6 +141,7 @@ switch Strategy
             save(['temp_input.mat'],'fInputVar')
         end
         save(['temp_input.mat'],'Parallel','-append')
+        closeSlave(Parallel,PRCDir,-1);
 end
 
 
@@ -154,6 +155,7 @@ end
 offset0 = fBlock-1;
 
 % Clean up remnants of previous runs.
+delete(['comp_status_',fname,'*.mat']);
 dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
 dynareParallelDeleteTraces(['P_',fname,'*End.txt']);
 dynareParallelDeleteTraces([fname,'_output_*.mat']);
@@ -353,7 +355,7 @@ for j=1:totCPU,
             
         case 1
             if Parallel(indPC).Local == 1 && newInstance,                       % 1.1 Run on the local machine.
-                if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)),  % Hybrid computing Windows <-> Unix!                   
+                if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)),  % Hybrid computing Windows <-> Unix!
                     if strfind([Parallel(indPC).MatlabOctavePath], 'octave')    % Hybrid computing Matlab(Master)-> Octave(Slaves) and Vice Versa!
                         command1=['octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
                     else
@@ -522,7 +524,6 @@ end
 pcerdone = NaN(1,totCPU);
 idCPU = NaN(1,totCPU);
 
-delete(['comp_status_',fname,'*.mat']);
 
 
 % Wait for the slaves to finish their job, and display some progress
@@ -585,9 +586,9 @@ NuoviFilecopiati=zeros(1,totSlaves);
 
 ForEver=1;
 statusString = '';
+flag_CloseAllSlaves=0;
 
 while (ForEver)
-    
     waitbarString = '';
     statusString0 = repmat('\b',1,length(sprintf(statusString, 100 .* pcerdone)));
     statusString = '';
@@ -605,6 +606,12 @@ while (ForEver)
         try
             if ~isempty(['comp_status_',fname,int2str(j),'.mat'])
                 load(['comp_status_',fname,int2str(j),'.mat']);
+%                 whoCloseAllSlaves = who(['comp_status_',fname,int2str(j),'.mat','CloseAllSlaves']);
+                if exist('CloseAllSlaves') && flag_CloseAllSlaves==0,
+                    flag_CloseAllSlaves=1;
+                    whoiamCloseAllSlaves=j;
+                    closeSlave(Parallel(1:totSlaves),PRCDir,1);
+                end
             end
             pcerdone(j) = prtfrc;
             idCPU(j) = njob;
@@ -652,7 +659,7 @@ while (ForEver)
     % Check if the slave(s) has generated some new files remotely.
     % 1. The files .log and .txt are not copied.
     % 2. The comp_status_*.mat files are managed separately.
-   
+    
     PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
     
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
@@ -667,7 +674,7 @@ while (ForEver)
         
         if HoTuttiGliOutput==totCPU,
             dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
-%             dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
+            %             dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
             if exist('OCTAVE_VERSION')|| (Parallel_info.console_mode == 1),
                 if exist('OCTAVE_VERSION')
                     printf('\n');
@@ -710,11 +717,16 @@ for j=1:totCPU,
         for jstack=1:length(fOutputVar.error.stack)
             fOutputVar.error.stack(jstack),
         end
-    else
+    elseif flag_CloseAllSlaves==0,
         fOutVar(j)=fOutputVar;
+    elseif j==whoiamCloseAllSlaves,
+        fOutVar=fOutputVar;        
     end
 end
 
+if flag_CloseAllSlaves==1,
+    closeSlave(Parallel(1:totSlaves),PRCDir,-1);
+end
 
 if iscrash,
     error('Remote jobs crashed');
@@ -736,9 +748,12 @@ switch Strategy
                 [A B C]=rmdir('dynareParallelLogFiles');
                 mkdir('dynareParallelLogFiles');
             end
-            
-            copyfile('*.log','dynareParallelLogFiles');
-            delete([fname,'*.log']);
+            % Modify by Ivano
+            try
+                copyfile('*.log','dynareParallelLogFiles');
+                delete([fname,'*.log']);
+            catch
+            end
             
             dynareParallelDeleteTraces(['*_core*_input*.mat']);
             %             if Parallel(indPC).Local == 1
@@ -760,7 +775,12 @@ switch Strategy
         if newInstance,
             delete ConcurrentCommand1.bat
         end
-        dynareParallelDeleteNewFiles(PRCDir,Parallel,PRCDirSnapshotInit);
+        % Modify by Ivano
+        for indPC=1:length(Parallel)
+            if Parallel(indPC).Local == 0,
+                dynareParallelDeleteNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshotInit(indPC));
+            end
+        end
 end
 
 

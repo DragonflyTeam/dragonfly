@@ -43,7 +43,8 @@ catch
 end
 
 fslave = dir( ['slaveParallel_input',int2str(njob),'.mat']);
-if isempty(fslave),
+fbreak = dir( ['slaveParallel_break.mat']);
+if isempty(fslave) || ~isempty(fbreak),
     error('Master asked to break the job');
 end
 
