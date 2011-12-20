@@ -39,10 +39,14 @@ Nodes=[];
 
 
 % Open, Read and Close, the input file ...
-FileConfigurationID=fopen(ParallelConfigurationFile);
-[FileText NonServe]=fscanf(FileConfigurationID,'%c');
-fclose(FileConfigurationID);
-
+try
+    FileConfigurationID=fopen(ParallelConfigurationFile);
+    [FileText NonServe]=fscanf(FileConfigurationID,'%c');
+    fclose(FileConfigurationID);
+catch
+    ErrorCode=10;
+    return
+end
 
 
 % Analyze FileText to build Parallel.
@@ -61,6 +65,9 @@ if isempty(Key02)
     Key02= strfind(FileText,'Name= ');
     if isempty(Key02)
         Key02= strfind(FileText,'Name =');
+        if isempty(Key02)
+            Key02= strfind(FileText,'Name=');
+        end
     end
 end
 
@@ -71,12 +78,14 @@ if isempty(Key03)
     Key03= strfind(FileText,'Members= ');
     if isempty(Key03)
         Key03= strfind(FileText,'Members =');
+        if isempty(Key03)
+            Key03= strfind(FileText,'Members=');
+        end
     end
 end
 
 
 Key04= strfind(FileText,'[node]');
-
 
 % In Cluster Header one or more key word is (are) missing.
 if (isempty(Key01) || (isempty(Key02)) || (isempty(Key03)) || (isempty(Key04)))
@@ -114,11 +123,17 @@ if length(Key01)==1
     lKey03=length('Members = ');
     if isempty(Key03)
         Key03= strfind(FileText,'Members= ');
+        lKey03=length('Members = ')-1;
         if isempty(Key03)
             Key03= strfind(FileText,'Members =');
+            lKey03=length('Members = ')-1;
+            if isempty(Key03)
+                Key03= strfind(FileText,'Members=');
+                lKey03=length('Members = ')-2;
+            end
         end
-        lKey03=length('Members = ')-1;
     end
+    
     
     
     FindKey03=regexp(FileText(Key03(1)+lKey03:end),'\n');
@@ -167,6 +182,11 @@ else    % We have two or more [cluster] keys.
             lKey02=length('Name = ')-1;
         end
         
+        if strcmp(FileText(Key02Temp(1):Key02Temp(1)+4),'Name=')
+            Key02= strfind(FileText,'Name=');
+            lKey02=length('Name = ')-2;
+        end
+        
         
         % Fix the exact form of the key 'Members'.
         Key03='';
@@ -184,6 +204,10 @@ else    % We have two or more [cluster] keys.
         if strcmp(FileText(Key03Temp(1):Key03Temp(1)+8),'Members =')
             Key03= strfind(FileText,'Members =');
             lKey03=length('Members = ')-1;
+        end
+        if strcmp(FileText(Key03Temp(1):Key03Temp(1)+7),'Members=')
+            Key03= strfind(FileText,'Members=');
+            lKey03=length('Members = ')-2;
         end
         
         
@@ -248,11 +272,17 @@ else    % We have two or more [cluster] keys.
         lKey03=length('Members = ');
         if isempty(Key03)
             Key03= strfind(PortionFileText,'Members= ');
+            lKey03=length('Members = ')-1;
             if isempty(Key03)
                 Key03= strfind(PortionFileText,'Members =');
+                lKey03=length('Members = ')-1;
+                if isempty(Key03)
+                    Key03= strfind(PortionFileText,'Members=');
+                    lKey03=length('Members = ')-2;
+                end
             end
-            lKey03=length('Members = ')-1;
         end
+        
         
         FindKey03=regexp(PortionFileText(Key03(1)+lKey03:end),'\n');
         Members=PortionFileText(Key03(1)+lKey03:Key03(1)+lKey03+FindKey03(1)-3);
@@ -276,17 +306,25 @@ end
 
 
 % Extract the single member (Node) Name and Compute the Node Weight.
-
-if isempty(regexp(Members,'('))
-    NoWeight=1;
+if exist('OCTAVE_VERSION')
+    if isempty(regexp(Members,'\('))
+        NoWeight=1;
+    else
+        NoWeight=0;
+    end
 else
-    NoWeight=0;
+    if isempty(regexp(Members,'('))
+        NoWeight=1;
+    else
+        NoWeight=0;
+    end
 end
+
 
 MembersName=[];
 j=1;
 Slide=1;
-% Find spaces in string Menbers.
+% Find spaces in string Members.
 nPositions=strfind(Members,' ');
 for i=1:length(nPositions)+1
     if i==length(nPositions)+1
@@ -321,6 +359,7 @@ else
     for i=1:length(MembersName)
         
         sTemp=MembersName(i).Name;
+        
         pA=regexp(sTemp,'(');
         pC=regexp(sTemp,')');
         
@@ -513,6 +552,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).ComputerName)
         Parallel(i).ComputerName='';
     end
+    lKey05=length('ComputerName = ');
+    
     
     
     % Find Key06.
@@ -534,7 +575,7 @@ for i=1:length(MembersName)
         if isempty(EndPoint)
             Parallel(i).CPUnbr=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey06:end);
         else
-            Parallel(i).CPUnbr =NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey06: NodeBlockEndOfLine(EndPoint)-1);
+            Parallel(i).CPUnbr=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey06: NodeBlockEndOfLine(EndPoint)-1);
         end
         % Remove from the string ' ', '\r', '\n', etc.
         Parallel(i).CPUnbr(isspace(Parallel(i).CPUnbr))='';
@@ -547,8 +588,14 @@ for i=1:length(MembersName)
     else
         
         % Format the CPU number.
-        aQ=regexp(Parallel(i).CPUnbr,'[');
-        cQ=regexp(Parallel(i).CPUnbr,']');
+        if exist('OCTAVE_VERSION')
+            aQ=regexp(Parallel(i).CPUnbr,'\[');
+            cQ=regexp(Parallel(i).CPUnbr,'\]');
+        else
+            
+            aQ=regexp(Parallel(i).CPUnbr,'[');
+            cQ=regexp(Parallel(i).CPUnbr,']');
+        end
         
         if (length(aQ) > 1) || (length(cQ)>1)
             ErrorCode=8;
@@ -584,10 +631,12 @@ for i=1:length(MembersName)
                 Reaction=ParallelGlobalErrorHandling(ErrorCode);
                 return
             else
-                Parallel(i).CPUnbr=[0:sN-fN];
+                Parallel(i).CPUnbr=[fN-1:sN-1];
             end
         end
     end
+    lKey06=length('CPUnbr = ');
+    
     
     
     % Find Key07.
@@ -620,6 +669,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).UserName)
         Parallel(i).UserName='';
     end
+    lKey07=length('UserName = ');
+    
     
     
     % Find Key08.
@@ -652,6 +703,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).Password)
         Parallel(i).Password='';
     end
+    lKey08=length('Password = ');
+    
     
     
     % Find Key09.
@@ -660,7 +713,7 @@ for i=1:length(MembersName)
         Key09Position=regexp(NodeBlock,Key09(k).RemoteDrive);
         if ~isempty(Key09Position)
             if k==4
-                lKey09=lKey09-1;
+                lKey09red=lKey09-1;
             end
             break;
         end
@@ -684,6 +737,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).RemoteDrive)
         Parallel(i).RemoteDrive='';
     end
+    lKey09=length('RemoteDrive = ');
+    
     
     
     % Find Key10.
@@ -692,7 +747,7 @@ for i=1:length(MembersName)
         Key10Position=regexp(NodeBlock,Key10(k).RemoteDirectory);
         if ~isempty(Key10Position)
             if k==4
-                lKey10=lKey10-1;
+                lKey10red=lKey10-1;
             end
             break;
         end
@@ -717,6 +772,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).RemoteDirectory)
         Parallel(i).RemoteDirectory='';
     end
+    lKey10=length('RemoteDirectory = ');
+    
     
     
     % Find Key11.
@@ -749,6 +806,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).ProgramPath)
         Parallel(i).ProgramPath='';
     end
+    lKey11=length('ProgramPath = ');
+    
     
     
     % Find Key12.
@@ -781,6 +840,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).ProgramConfig)
         Parallel(i).ProgramConfig='';
     end
+    lKey12=length('ProgramConfig = ');
+    
     
     
     % Find Key13.
@@ -813,6 +874,19 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).MatlabOctavePath)
         Parallel(i).MatlabOctavePath='';
     end
+    lKey13=length('MatlabOctavePath = ');
+    
+    % The field 'MatlabOctavePath' must be contain the string 'octave' or
+    % 'matlab'.
+    
+    strTemp=Parallel(i).MatlabOctavePath;
+    
+    if isempty(strfind(strTemp,'matlab')) && isempty(strfind(strTemp,'octave'))
+        ErrorCode=11;
+        Reaction=ParallelGlobalErrorHandling(ErrorCode);
+        return
+    end
+    
     
     
     % Find Key14.
@@ -834,7 +908,7 @@ for i=1:length(MembersName)
         if isempty(EndPoint)
             Parallel(i).OperatingSystem=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey14:end);
         else
-            Parallel(i).OperatingSystem=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey14: NodeBlockEndOfLine(EndPoint)-1);
+            Parallel(i).OperatingSystem=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey14:NodeBlockEndOfLine(EndPoint)-1);
         end
         % Remove from the string ' ', '\r', '\n', etc.
         Parallel(i).OperatingSystem(isspace(Parallel(i).OperatingSystem))='';
@@ -845,6 +919,8 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).OperatingSystem)
         Parallel(i).OperatingSystem='';
     end
+    lKey14=length('OperatingSystem = ');
+    
     
     
     % Find Key15.
@@ -877,7 +953,7 @@ for i=1:length(MembersName)
     if isempty(Parallel(i).SingleCompThread)
         Parallel(i).SingleCompThread='';
     end
-    
+    lKey15=length('SingleCompThread = ');
     
     
     
@@ -907,7 +983,6 @@ for i=1:length(MembersName)
     % Controls on the Parallel fields mandatory.
     
     % 1. The field Node Name is Mandatory always and it is checked above.
-    
     
     % 2. The field CPUnbr is Mandatory always.
     if isempty(Parallel(i).CPUnbr)
