@@ -631,7 +631,9 @@ while (ForEver)
                 if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem))
                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 else
-                    statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                   % Modify by Ivano
+                   % To test the 'nested' function call!
+                   % statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 end
             end
         end
@@ -775,7 +777,6 @@ switch Strategy
         if newInstance,
             delete ConcurrentCommand1.bat
         end
-        % Modify by Ivano
         for indPC=1:length(Parallel)
             if Parallel(indPC).Local == 0,
                 dynareParallelDeleteNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshotInit(indPC));
