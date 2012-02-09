@@ -633,7 +633,7 @@ while (ForEver)
                 else
                    % Modify by Ivano
                    % To test the 'nested' function call!
-                   % statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                   statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 end
             end
         end
