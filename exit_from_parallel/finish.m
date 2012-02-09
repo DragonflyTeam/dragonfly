@@ -19,4 +19,4 @@ catch
     disp(' ');
 end
 
-rmpath('C:\DRAGONFLY\parallel\Exit from Parallel');
+rmpath([Parallel_info.parallelroot,filesep,'exit_from_parallel']);
