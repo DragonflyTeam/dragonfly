@@ -20,9 +20,9 @@ function dyn_waitbar_close(h)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global options_
+global Parallel_info
 
-if exist('OCTAVE_VERSION') || options_.console_mode,
+if exist('OCTAVE_VERSION') || Parallel_info.console_mode,
     clear dyn_waitbar;
     diary on,
     fprintf('\n');

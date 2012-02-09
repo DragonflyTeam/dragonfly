@@ -20,7 +20,7 @@ function h = dyn_waitbar(prctdone, varargin)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global options_
+global Parallel_info
 persistent running_text newString
 persistent whoiam Parallel
 
@@ -44,7 +44,7 @@ end
 
 if ~whoiam
     
-    if exist('OCTAVE_VERSION') || options_.console_mode,
+    if exist('OCTAVE_VERSION') || Parallel_info.console_mode,
                 
         if init,
             diary off;
