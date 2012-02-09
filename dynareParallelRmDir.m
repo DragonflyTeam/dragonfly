@@ -35,7 +35,25 @@ if nargin ==0,
     return
 end
 
+% security check of remote folder delete
+ok(1)=isempty(strfind(Parallel_info.RemoteTmpFolder,'..'));
+tmp1=strfind(Parallel_info.RemoteTmpFolder,'2');
+ok(2)=tmp1(1)==1;
+ok(3)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'-'));
+ok(4)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'h'));
+ok(5)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'m'));
+ok(6)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'s'));
+ok(7)=~isempty(PRCDir);
+
+if sum(ok)<7,
+    error('The name of the remote tmp folder does not comply the security standards!'),
+end
+
 for indPC=1:length(Parallel),
+    ok(1)=isempty(strfind(Parallel(indPC).RemoteDirectory,'..'));
+    if sum(ok)<7,
+        error('The remote folder path structure does not comply the security standards!'),
+    end
     while (1)
         if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)
             [stat NonServe] = system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir,]);
