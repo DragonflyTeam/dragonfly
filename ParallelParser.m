@@ -45,6 +45,7 @@ try
     fclose(FileConfigurationID);
 catch
     ErrorCode=10;
+    Reaction=ParallelGlobalErrorHandling(ErrorCode);
     return
 end
 
@@ -1025,12 +1026,12 @@ for i=1:length(MembersName)
 end
 
 if Visualize==1
-    display(' ');
-    display('Parser Analysis Results:');
-    display(' ');
+    disp(' ');
+    disp('Parser Analysis Results:');
+    disp(' ');
     for i=1:length(Parallel)
         disp(Parallel(i));
-        display(' ');
+        disp(' ');
     end
 end
 

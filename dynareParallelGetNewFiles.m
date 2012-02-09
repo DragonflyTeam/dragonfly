@@ -32,7 +32,6 @@ function [PRCDirSnapshot]=dynareParallelGetNewFiles(PRCDir,Parallel,PRCDirSnapsh
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-
 NewFilesFromSlaves={};
 
 % try
@@ -47,7 +46,7 @@ for indPC=1:length(Parallel),
         end
 
         if ~isempty(NewFilesFromSlaves)
-
+            
             for i=1:length(NewFilesFromSlaves)
                 SlashNumberAndPosition=[];
                 PRCDirPosition=findstr(NewFilesFromSlaves{i}, ([PRCDir]));
@@ -57,11 +56,10 @@ for indPC=1:length(Parallel),
                 SlashNumberAndPosition=findstr(sT,fS);
                 fileaddress={sT(1:SlashNumberAndPosition(end)),sT(SlashNumberAndPosition(end)+1:end)};
                 dynareParallelGetFiles(fileaddress,PRCDir,Parallel(indPC));
-
-                display('New file copied in local -->');
-                display(fileaddress{2});
-                display('<--');
-
+                
+                disp('New file copied in local -->');
+                disp(fileaddress{2});
+                disp('<--');
             end
         else
             continue
