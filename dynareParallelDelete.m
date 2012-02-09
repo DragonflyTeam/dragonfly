@@ -40,7 +40,7 @@ else
 end
 
 for indPC=1:length(Parallel),
-    if isunix
+    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
         [NonServeS NonServeD]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -f ',Parallel(indPC).RemoteDirectory,'/',pname,fname]);
     else
         delete(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',pname,fname]);
