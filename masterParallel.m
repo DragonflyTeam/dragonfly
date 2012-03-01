@@ -633,7 +633,7 @@ while (ForEver)
                 else
                    % Modify by Ivano
                    % To test the 'nested' function call!
-                   statusString = [statusString, int2str(j), ' %3.f%% done! '];
+%                    statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 end
             end
         end
@@ -643,7 +643,8 @@ while (ForEver)
             printf([statusString,'\r'], 100 .* pcerdone);
         else
             if ~isempty(statusString)
-                fprintf([statusString0,statusString], 100 .* pcerdone);
+                fprintf([statusString0]);
+                fprintf([statusString], 100 .* pcerdone);
             end
         end
         
