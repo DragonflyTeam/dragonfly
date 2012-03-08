@@ -29,25 +29,24 @@ function dynareParallelRmDir(PRCDir,Parallel)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 if nargin ==0,
     disp('dynareParallelRmDir(fname)')
     return
 end
 
-% security check of remote folder delete
-ok(1)=isempty(strfind(Parallel_info.RemoteTmpFolder,'..'));
-tmp1=strfind(Parallel_info.RemoteTmpFolder,'2');
-ok(2)=tmp1(1)==1;
-ok(3)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'-'));
-ok(4)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'h'));
-ok(5)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'m'));
-ok(6)=~isempty(strfind(Parallel_info.RemoteTmpFolder,'s'));
+% Security check of remote folder delete.
+ok(1)=isempty(strfind(PRCDir,'..'));
+tmp=strfind(PRCDir,'2');
+ok(2)=tmp(1)==1;
+ok(3)=~isempty(strfind(PRCDir,'-'));
+ok(4)=~isempty(strfind(PRCDir,'h'));
+ok(5)=~isempty(strfind(PRCDir,'m'));
+ok(6)=~isempty(strfind(PRCDir,'s'));
 ok(7)=~isempty(PRCDir);
-
 if sum(ok)<7,
     error('The name of the remote tmp folder does not comply the security standards!'),
 end
+
 
 for indPC=1:length(Parallel),
     ok(1)=isempty(strfind(Parallel(indPC).RemoteDirectory,'..'));
