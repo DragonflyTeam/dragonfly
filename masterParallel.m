@@ -10,7 +10,7 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % necessary and then closed. This can happen many times during the
 % simulation of a model.
 
-% 1 Alway Open Stategy:
+% 1 Alway Open Strategy:
 % In this case we have a more sophisticated management of slave processes,
 % which are no longer closed at the end of each job. The slave processes
 % waits for a new job (if exist). If a slave do not receives a new job after a
@@ -88,8 +88,8 @@ if nargin>8 && initialize==1
     if islocal == 0,
         PRCDir=CreateTimeString();
         assignin('base','PRCDirTmp',PRCDir),
-        evalin('base','Parallel_info.RemoteTmpFolder=PRCDirTmp;')
-        evalin('base','clear PRCDirTmp,')
+        evalin('base','global Parallel_info; Parallel_info.RemoteTmpFolder=PRCDirTmp;')
+        evalin('base','clear PRCDirTmp,')      
     else
         % Delete the traces (if existing) of last local session of computations.
         if Strategy==1,
@@ -336,6 +336,7 @@ for j=1:totCPU,
                             command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                 ' -low  octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
+                            
                             command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                 ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         end
@@ -589,6 +590,7 @@ statusString = '';
 flag_CloseAllSlaves=0;
 
 while (ForEver)
+   
     waitbarString = '';
     statusString0 = repmat('\b',1,length(sprintf(statusString, 100 .* pcerdone)));
     statusString = '';
@@ -626,14 +628,11 @@ while (ForEver)
                 status_Title{j} = waitbarTitle;
             end
         catch % ME
-            % To define!
             if exist('OCTAVE_VERSION') || (Parallel_info.console_mode == 1),
                 if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem))
                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 else
-                   % Modify by Ivano
-                   % To test the 'nested' function call!
-%                    statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                    statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 end
             end
         end
@@ -643,8 +642,7 @@ while (ForEver)
             printf([statusString,'\r'], 100 .* pcerdone);
         else
             if ~isempty(statusString)
-                fprintf([statusString0]);
-                fprintf([statusString], 100 .* pcerdone);
+                fprintf([statusString0,statusString], 100 .* pcerdone);
             end
         end
         
@@ -663,7 +661,9 @@ while (ForEver)
     % 1. The files .log and .txt are not copied.
     % 2. The comp_status_*.mat files are managed separately.
     
-    PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
+    if (flag_CloseAllSlaves==0) || (Strategy == 1) % To avoid some problems of synchronism in OCTAVE!
+        PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
+    end
     
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
         HoTuttiGliOutput=0;
@@ -744,7 +744,7 @@ switch Strategy
     case 0
         for indPC=1:length(Parallel)
             if Parallel(indPC).Local == 0
-                dynareParallelRmDir(PRCDir,Parallel(indPC));
+               dynareParallelRmDir(PRCDir,Parallel(indPC));
             end
             
             if isempty(dir('dynareParallelLogFiles'))
