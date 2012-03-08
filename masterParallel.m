@@ -159,6 +159,8 @@ delete(['comp_status_',fname,'*.mat']);
 dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
 dynareParallelDeleteTraces(['P_',fname,'*End.txt']);
 dynareParallelDeleteTraces([fname,'_output_*.mat']);
+dynareParallelDeleteTraces('slaveParallel_break.mat');
+
 
 
 % Create a shell script containing the commands to launch the required
