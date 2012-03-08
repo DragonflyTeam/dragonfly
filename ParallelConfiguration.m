@@ -35,6 +35,7 @@ function [SomeOutput] = ParallelConfiguration(In1,In2,In3,In4,In5)
 
 global Parallel Parallel_info
 
+more off;
 if isempty(Parallel) || isempty(Parallel_info)
     Parallel=[];
     Parallel_info=[];
