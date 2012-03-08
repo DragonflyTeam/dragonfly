@@ -44,9 +44,10 @@ for indPC=1:length(Parallel),
         else
             fS='\';
         end
-
+        
         if ~isempty(NewFilesFromSlaves)
-            
+            disp(' ');
+            disp(' ');
             for i=1:length(NewFilesFromSlaves)
                 SlashNumberAndPosition=[];
                 PRCDirPosition=findstr(NewFilesFromSlaves{i}, ([PRCDir]));
@@ -64,8 +65,8 @@ for indPC=1:length(Parallel),
         else
             continue
         end
-
-
+        
+        
     end
 end
 
