@@ -39,7 +39,7 @@ end
 s=warning('off');
 
 if partial==1
-    save('slaveParallel_break','partial')
+    save('slaveParallel_break.mat','partial')
     for indPC=1:length(Parallel),
         if (Parallel(indPC).Local==0),
             dynareParallelSendFiles('slaveParallel_break.mat',TmpFolder,Parallel(indPC));
