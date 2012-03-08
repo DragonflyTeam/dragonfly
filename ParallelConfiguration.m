@@ -35,7 +35,6 @@ function [SomeOutput] = ParallelConfiguration(In1,In2,In3,In4,In5)
 
 global Parallel Parallel_info
 
-
 if isempty(Parallel) || isempty(Parallel_info)
     Parallel=[];
     Parallel_info=[];
@@ -239,6 +238,7 @@ delete(['P_slave_*End.txt']);
 masterParallel(Parallel,[],[],[],[],[],[],Parallel_info,1);
 
 
+
 %  We sort in the user CPUWeight and most important the Parallel vector
 %  in accord with this operation.
 
@@ -281,6 +281,5 @@ else
     disp('A Cluster is Active!');
     disp(' ');
 end
-
 end
 
