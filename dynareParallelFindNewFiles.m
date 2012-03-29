@@ -44,31 +44,7 @@ LnFl=length(NewFileList);
 
 RelativePosition=1;
 
-for i=1:LnFl
-    
-    % Exception Handling
-    
-    % If you comment the code below all new file will be copied!
-    
-    % 1. The comp_status* files are managed separately.
-    
-    FiCoS=strfind(NewFileList{i},'comp_status_');
-    if ~isempty(FiCoS)
-        continue
-    end
-    
-    % 2. For the time being is not necessary to always copy *.log
-    %    and *.txt files.
-    
-    nC1 = strfind(NewFileList{i}, '.log');
-    % nC2 = strfind(NewFileList{i}, '.txt');
-    
-    if (~isempty(nC1)) % || ~isempty(nC2))
-        continue
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+for i=1:LnFl    
     
     N=strmatch(NewFileList{i},FileList,'exact');
     if isempty(N)

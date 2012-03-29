@@ -1,4 +1,4 @@
-function [PRCDirSnapshot]=dynareParallelGetNewFiles(PRCDir,Parallel,PRCDirSnapshot)
+function [PRCDirSnapshot]=dynareParallelGetNewFiles(PRCDir,Parallel,PRCDirSnapshot,varargin)
 % PARALLEL CONTEXT
 % In a parallel context, this is a specialized function able to ...
 %
@@ -56,11 +56,17 @@ for indPC=1:length(Parallel),
                 sT(1)='.';
                 SlashNumberAndPosition=findstr(sT,fS);
                 fileaddress={sT(1:SlashNumberAndPosition(end)),sT(SlashNumberAndPosition(end)+1:end)};
-                dynareParallelGetFiles(fileaddress,PRCDir,Parallel(indPC));
+                exception_flag=0;
+                for indexc=1:length(varargin)
+                    exception_flag=exception_flag+(~isempty(strfind(fileaddress{2},varargin{indexc})));
+                end
+                if exception_flag==0,
+                    dynareParallelGetFiles(fileaddress,PRCDir,Parallel(indPC));
                 
-                disp('New file copied in local -->');
-                disp(fileaddress{2});
-                disp('<--');
+                    disp('New file copied in local -->');
+                    disp(fileaddress{2});
+                    disp('<--');
+                end
             end
         else
             continue

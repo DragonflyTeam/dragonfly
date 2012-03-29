@@ -89,7 +89,7 @@ if nargin>8 && initialize==1
         PRCDir=CreateTimeString();
         assignin('base','PRCDirTmp',PRCDir),
         evalin('base','global Parallel_info; Parallel_info.RemoteTmpFolder=PRCDirTmp;')
-        evalin('base','clear PRCDirTmp,')      
+        evalin('base','clear PRCDirTmp,')
     else
         % Delete the traces (if existing) of last local session of computations.
         if Strategy==1,
@@ -155,12 +155,13 @@ end
 offset0 = fBlock-1;
 
 % Clean up remnants of previous runs.
-delete(['comp_status_',fname,'*.mat']);
 dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
+dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel);
 dynareParallelDeleteTraces(['P_',fname,'*End.txt']);
 dynareParallelDeleteTraces([fname,'_output_*.mat']);
+dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel);
 dynareParallelDeleteTraces('slaveParallel_break.mat');
-
+dynareParallelDelete('slaveParallel_break.mat',PRCDir,Parallel);
 
 
 % Create a shell script containing the commands to launch the required
@@ -357,6 +358,7 @@ for j=1:totCPU,
             
             
         case 1
+
             if Parallel(indPC).Local == 1 && newInstance,                       % 1.1 Run on the local machine.
                 if (~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)),  % Hybrid computing Windows <-> Unix!
                     if strfind([Parallel(indPC).MatlabOctavePath], 'octave')    % Hybrid computing Matlab(Master)-> Octave(Slaves) and Vice Versa!
@@ -429,7 +431,7 @@ for j=1:totCPU,
                         PRCDirSnapshot(indPC)=dynareParallelSnapshot(PRCDir,Parallel(indPC));
                         PRCDirSnapshotInit(indPC) = PRCDirSnapshot(indPC);
                     else
-                        PRCDirSnapshot(indPC)=dynareParallelGetNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshot(indPC));
+                        PRCDirSnapshot(indPC)=dynareParallelGetNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshot(indPC),'comp_status','.log');
                     end
                     dynareParallelSendFiles(['slaveJob',int2str(j),'.mat'],PRCDir,Parallel(indPC));
                     delete(['slaveJob',int2str(j),'.mat']);
@@ -592,7 +594,7 @@ statusString = '';
 flag_CloseAllSlaves=0;
 
 while (ForEver)
-   
+    
     waitbarString = '';
     statusString0 = repmat('\b',1,length(sprintf(statusString, 100 .* pcerdone)));
     statusString = '';
@@ -610,7 +612,7 @@ while (ForEver)
         try
             if ~isempty(['comp_status_',fname,int2str(j),'.mat'])
                 load(['comp_status_',fname,int2str(j),'.mat']);
-%                 whoCloseAllSlaves = who(['comp_status_',fname,int2str(j),'.mat','CloseAllSlaves']);
+                %                 whoCloseAllSlaves = who(['comp_status_',fname,int2str(j),'.mat','CloseAllSlaves']);
                 if exist('CloseAllSlaves') && flag_CloseAllSlaves==0,
                     flag_CloseAllSlaves=1;
                     whoiamCloseAllSlaves=j;
@@ -663,9 +665,18 @@ while (ForEver)
     % 1. The files .log and .txt are not copied.
     % 2. The comp_status_*.mat files are managed separately.
     
-    if (flag_CloseAllSlaves==0) || (Strategy == 1) % To avoid some problems of synchronism in OCTAVE!
-        PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
+    if exist('OCTAVE_VERSION') && (Strategy == 0) % To avoid some problems of synchronism in OCTAVE!
+        try
+            PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot,'comp_status','.log');
+        catch
+        end
+    else
+        PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot,'comp_status','.log');
     end
+    
+    %     if (flag_CloseAllSlaves==0) || (Strategy == 1) % To avoid some problems of synchronism in OCTAVE!
+    %         PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
+    %     end
     
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
         HoTuttiGliOutput=0;
@@ -679,7 +690,8 @@ while (ForEver)
         
         if HoTuttiGliOutput==totCPU,
             dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
-            %             dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
+%             dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel(1:totSlaves));
+%             dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
             if exist('OCTAVE_VERSION')|| (Parallel_info.console_mode == 1),
                 if exist('OCTAVE_VERSION')
                     printf('\n');
@@ -700,7 +712,6 @@ while (ForEver)
     end
     
 end
-
 
 % Load and format remote output.
 iscrash = 0;
@@ -725,7 +736,7 @@ for j=1:totCPU,
     elseif flag_CloseAllSlaves==0,
         fOutVar(j)=fOutputVar;
     elseif j==whoiamCloseAllSlaves,
-        fOutVar=fOutputVar;        
+        fOutVar=fOutputVar;
     end
 end
 
@@ -746,7 +757,7 @@ switch Strategy
     case 0
         for indPC=1:length(Parallel)
             if Parallel(indPC).Local == 0
-               dynareParallelRmDir(PRCDir,Parallel(indPC));
+                dynareParallelRmDir(PRCDir,Parallel(indPC));
             end
             
             if isempty(dir('dynareParallelLogFiles'))
@@ -782,7 +793,7 @@ switch Strategy
         end
         for indPC=1:length(Parallel)
             if Parallel(indPC).Local == 0,
-                dynareParallelDeleteNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshotInit(indPC));
+                dynareParallelDeleteNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshotInit(indPC),'.log');
             end
         end
 end
