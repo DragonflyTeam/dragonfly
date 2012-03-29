@@ -136,7 +136,6 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
 
                 % Save the output result.
                 save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
-%                 keyboard,
                 if isfield(fOutputVar,'CloseAllSlaves'),
                     CloseAllSlaves = 1;
                     fOutputVar = rmfield(fOutputVar,'CloseAllSlaves');
@@ -147,7 +146,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
                 % Inform the master that the job is finished, and transfer the output data
                 delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
             end
-
+            
             disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.']);
             t0 =clock; % Re-set waiting time of 20 mins
         catch,
