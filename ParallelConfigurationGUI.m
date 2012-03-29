@@ -114,7 +114,8 @@ if isempty(Parallel) || isempty(Parallel_info)
     % The contained the "finish.m" file, used to close, if exist
     % the slaves. This code must be execut onfly by "master" Matalab!
     
-    addpath('C:\DRAGONFLY\parallel\Exit from Parallel');
+    addpath([parallelroot,filesep,'exit_from_parallel']);
+
 end
 
 % --- Outputs from this function are returned to the command line.
