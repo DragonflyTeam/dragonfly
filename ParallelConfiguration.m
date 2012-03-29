@@ -35,6 +35,7 @@ function [SomeOutput] = ParallelConfiguration(In1,In2,In3,In4,In5)
 
 global Parallel Parallel_info
 
+% Disable output paging (it is on by default on Octave)
 more off;
 if isempty(Parallel) || isempty(Parallel_info)
     Parallel=[];
@@ -225,12 +226,19 @@ for j=1:length(Parallel),
     end
 end
 
+% Extracts the value of the global variables Parallel and Parallel_info
+% in the MATLAB base workspace.
+
+evalin('base','global Parallel');
+evalin('base','global Parallel_info');
+
 
 % Invoke masterParallel with 8 arguments and the last equal to 1. With this shape
 % for input data, masterParallel only create a new directory for remote
 % computation. The name of this directory is time depending. For local
 % parallel computations with Strategy == 1 delete the traces (if exists) of
 % previous computations.
+
 
 % If the computation is only 'local' this value is unchanched!
 Parallel_info.RemoteTmpFolder='';
