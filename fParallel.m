@@ -83,7 +83,12 @@ try,
     end
     if isfield(fOutputVar,'CloseAllSlaves'),
         CloseAllSlaves = 1;
-        save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
+        try
+            save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
+        catch
+            pause(1)
+            save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
+        end
         fOutputVar = rmfield(fOutputVar,'CloseAllSlaves');
         save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
     end
