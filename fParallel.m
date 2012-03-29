@@ -83,14 +83,17 @@ try,
     end
     if isfield(fOutputVar,'CloseAllSlaves'),
         CloseAllSlaves = 1;
-        try
-            save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
-        catch
-            pause(1)
-            save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
-        end
         fOutputVar = rmfield(fOutputVar,'CloseAllSlaves');
         save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+        savedok=0;
+        while savedok==0
+            try
+                save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
+                savedok=1;
+            catch
+                pause(0.05)
+            end
+        end
     end
     
     disp(['fParallel ',int2str(whoiam),' completed.'])
