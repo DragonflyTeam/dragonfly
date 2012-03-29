@@ -83,9 +83,9 @@ try,
     end
     if isfield(fOutputVar,'CloseAllSlaves'),
         CloseAllSlaves = 1;
+        save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
         fOutputVar = rmfield(fOutputVar,'CloseAllSlaves');
         save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
-        save(['comp_status_',funcName,int2str(whoiam),'.mat'],'CloseAllSlaves');
     end
     
     disp(['fParallel ',int2str(whoiam),' completed.'])
