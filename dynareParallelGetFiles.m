@@ -90,6 +90,7 @@ for indPC=1:length(Parallel),
             end
             for jfil=1:size(NamFileInput,1),
                 if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
+                    LocalCheckPath(NamFileInput{jfil,1});
                     copyfile(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInput{jfil,1},NamFileInput{jfil,2}],NamFileInput{jfil,1});
                 end
             end
