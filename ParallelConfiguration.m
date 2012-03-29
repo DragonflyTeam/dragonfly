@@ -42,7 +42,7 @@ if isempty(Parallel) || isempty(Parallel_info)
     Parallel_info=[];
     
     % Default Setting:
-    Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dynare.ini']);
+    Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dragonfly.ini']);
     Parallel_info.ClusterName='';
     Parallel_info.leaveSlaveOpen=0;
     if exist('OCTAVE_VERSION')
@@ -92,7 +92,7 @@ if nargin ~= 0
     Parallel_info=[];
     
     % Default Setting:
-    Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dynare.ini']);
+    Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dragonfly.ini']);
     Parallel_info.ClusterName='';
     Parallel_info.leaveSlaveOpen=0;
     if exist('OCTAVE_VERSION')
@@ -147,7 +147,7 @@ if nargin ~= 0
             continue
         end
         
-        if strfind(Parallel_info.ConfigurationFileName,([getenv('APPDATA'),'\dynare.ini']))
+        if strfind(Parallel_info.ConfigurationFileName,([getenv('APPDATA'),'\dragonfly.ini']))
             Parallel_info.ConfigurationFileName=UserInputs{i};
             
             if i<length(UserInputs)

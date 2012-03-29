@@ -105,7 +105,7 @@ if isempty(Parallel) || isempty(Parallel_info)
     Parallel=[];
     Parallel_info=[];
     
-    Parallel_info.ConfigurationFileName='C:\Documents and Settings\Ivano\Application Data\dynare.ini';
+    Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dragonfly.ini']);
     Flag01=0;
     set(handles.ClusterName, 'String', '');
     set(handles.SlaveOpenMode,'Value',0);
