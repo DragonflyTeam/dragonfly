@@ -93,7 +93,7 @@ if nargin>8 && initialize==1
     else
         % Delete the traces (if existing) of last local session of computations.
         if Strategy==1,
-            dynareParallelDeleteTraces(['slaveParallel_input*.mat']);
+            mydelete(['slaveParallel_input*.mat']);
         end
     end
     return
@@ -155,12 +155,14 @@ end
 offset0 = fBlock-1;
 
 % Clean up remnants of previous runs.
-dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
-dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel);
-dynareParallelDeleteTraces(['P_',fname,'*End.txt']);
-dynareParallelDeleteTraces([fname,'_output_*.mat']);
+
+mydelete(['comp_status_',fname,'*.mat']);
+mydelete(['P_',fname,'*End.txt']);
+mydelete([fname,'_output_*.mat']);
+mydelete('slaveParallel_break.mat');
+
 dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel);
-dynareParallelDeleteTraces('slaveParallel_break.mat');
+dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel);
 dynareParallelDelete('slaveParallel_break.mat',PRCDir,Parallel);
 
 
@@ -246,7 +248,7 @@ for j=1:totCPU,
             fid1=fopen(['stayalive',int2str(j),'.txt'],'w+');
             fclose(fid1);
             dynareParallelSendFiles(['stayalive',int2str(j),'.txt'],PRCDir,Parallel(indPC));
-            dynareParallelDeleteTraces(['stayalive',int2str(j),'.txt']);
+            mydelete(['stayalive',int2str(j),'.txt']);
         end
         % Wait for possibly local alive CPU to start the new job or close by
         % internal criteria.
@@ -689,9 +691,9 @@ while (ForEver)
         end
         
         if HoTuttiGliOutput==totCPU,
-            dynareParallelDeleteTraces(['comp_status_',fname,'*.mat']);
-%             dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel(1:totSlaves));
-%             dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
+            mydelete(['comp_status_',fname,'*.mat']);
+%           dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel(1:totSlaves));
+%           dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
             if exist('OCTAVE_VERSION')|| (Parallel_info.console_mode == 1),
                 if exist('OCTAVE_VERSION')
                     printf('\n');
@@ -771,7 +773,7 @@ switch Strategy
             catch
             end
             
-            dynareParallelDeleteTraces(['*_core*_input*.mat']);
+            mydelete(['*_core*_input*.mat']);
             %             if Parallel(indPC).Local == 1
             %                 delete(['slaveParallel_input*.mat']);
             %             end
@@ -797,6 +799,7 @@ switch Strategy
             end
         end
 end
+
 
 
 
