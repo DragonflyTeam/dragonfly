@@ -1,4 +1,4 @@
-function dynareParallelDeleteTraces(fname,pname)
+function mydelete(fname,pname)
 % Specialized version of delete() function
 
 % Copyright (C) 2009 Dynare Team
@@ -19,7 +19,7 @@ function dynareParallelDeleteTraces(fname,pname)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin ==0,
-    disp('dynareParallelDeleteTraces(fname)')
+    disp('mydelete(fname)')
     return
 end
 
