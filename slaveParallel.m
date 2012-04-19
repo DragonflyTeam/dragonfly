@@ -45,7 +45,7 @@ diary( ['slaveParallel_',int2str(whoiam),'.log']);
 % dynareroot = dynare_config();
 
 % Load input data.
-load( ['slaveParallel_input',int2str(whoiam)]);
+load( ['slaveParallel_input',int2str(whoiam),'.mat']);
 
 %Loads fGlobalVar Parallel.
 if exist('fGlobalVar'),
@@ -57,7 +57,7 @@ if exist('fGlobalVar'),
     struct2local(fGlobalVar);
     clear fGlobalVar
     % create global variables in the base workspace as well
-    evalin('base',['load( [''slaveParallel_input',int2str(whoiam),'''],''fGlobalVar'')']) ;
+    evalin('base',['load( [''slaveParallel_input',int2str(whoiam),'.mat''],''fGlobalVar'')']) ;
     evalin('base','struct2local(fGlobalVar)');
     evalin('base','clear fGlobalVar');
 end
@@ -114,7 +114,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
                 end
             end
             struct2local(fGlobalVar);
-            evalin('base',['load( [''slaveJob',int2str(whoiam),'''],''fGlobalVar'')']);
+            evalin('base',['load( [''slaveJob',int2str(whoiam),'.mat''],''fGlobalVar'')']);
             evalin('base','struct2local(fGlobalVar)');
             evalin('base','clear fGlobalVar');
         end

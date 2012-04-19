@@ -49,7 +49,7 @@ diary( [fname,'_',int2str(whoiam),'.log']);
 % dynareroot = dynare_config();
 
 % Load input data.
-load( [fname,'_input'])
+load( [fname,'_input.mat'])
 
 if exist('fGlobalVar') && ~isempty (fGlobalVar)
     globalVars = fieldnames(fGlobalVar);
@@ -59,7 +59,7 @@ if exist('fGlobalVar') && ~isempty (fGlobalVar)
     end
     struct2local(fGlobalVar);
     % Create global variables in the base workspace as well.
-    evalin('base',['load( [''',fname,'_input''],''fGlobalVar'')'])
+    evalin('base',['load( [''',fname,'_input.mat''],''fGlobalVar'')'])
     evalin('base','struct2local(fGlobalVar)');
 end
 
