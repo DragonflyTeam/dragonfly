@@ -1,4 +1,4 @@
-function [] = ParallelMapRemoteDrive()
+function [] = ParallelMapRemoteDrive(fname)
 
 % PARALLEL CONTEXT
 % In a parallel context, this function is used to
@@ -38,12 +38,16 @@ if isempty(Parallel) || isempty(Parallel_info)
     return;
 end
 
+if nargin ==0 || isempty(fname)
+    fname='*.m';
+end
+
 for i=1:length(Parallel)
     if (Parallel(i).Local==0)
         if (Parallel_info.RemoteTmpFolder)
-            dynareParallelSendFiles('*.*',Parallel_info.RemoteTmpFolder,Parallel);
+            dynareParallelSendFiles(fname,Parallel_info.RemoteTmpFolder,Parallel);
             disp(' ');
-            disp(['Mapping of Remote Drive on ', Parallel(i).ComputerName, ' Macchine ok!']);
+            disp(['Mapping of Remote Drive files ',fname,' on ', Parallel(i).ComputerName, ' Macchine ok!']);
             disp(' ');
         end
     end
