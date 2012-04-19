@@ -62,7 +62,7 @@ for indPC=1:length(Parallel),
             end
 
         end
-        dirlist = [dirlist, ax];
+        dirlist = char(dirlist, ax);
     else
         if exist('OCTAVE_VERSION'),     % Patch for peculiar behaviour of ls under Windows.
             if Parallel(indPC).Local==0,
@@ -87,6 +87,6 @@ for indPC=1:length(Parallel),
                 ax=ls(filename);
             end
         end
-        dirlist = [dirlist; ax];
+        dirlist = char(dirlist, ax);
     end
 end
