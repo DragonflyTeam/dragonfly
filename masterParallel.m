@@ -305,7 +305,7 @@ for j=1:totCPU,
                     end
                 else    % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                     if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                        command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                        command1=['psexec -d -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "cd ',DyMo, '; default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     else
                         command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     end
@@ -338,8 +338,8 @@ for j=1:totCPU,
                     if ~strcmp(Parallel(indPC).ComputerName,MasterName),  % 0.3 Run on a remote machine!
                         % Hybrid computing Matlab(Master)-> Octave(Slaves) and Vice Versa!
                         if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
                             
                             command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
@@ -348,8 +348,8 @@ for j=1:totCPU,
                     else                                                  % 0.4 Run on the local machine via the network
                         % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                         if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  octave --eval "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
                             command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                 ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
@@ -370,7 +370,7 @@ for j=1:totCPU,
                     end
                 else    % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                     if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                        command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                        command1=['psexec -d -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "cd ',DyMo, '; default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                     else
                         command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                     end
@@ -407,8 +407,8 @@ for j=1:totCPU,
                         if ~strcmp(Parallel(indPC).ComputerName,MasterName), % 1.3 Run on a remote machine.
                             % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                             if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                    ' -low  octave --eval "default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                    ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             else
                                 command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                     ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
@@ -416,8 +416,8 @@ for j=1:totCPU,
                         else                                                % 1.4 Run on the local machine via the network.
                             % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                             if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                    ' -low  octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                    ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             else
                                 command1=['psexec \\',Parallel(indPC).ComputerName,' -d -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                     ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
