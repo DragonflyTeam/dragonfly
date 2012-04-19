@@ -131,6 +131,7 @@ if nargin ~= 0
     
     for i=1: length(UserInputs)
         
+        OriginalUserInput=UserInputs{i};
         InTemp=lower(UserInputs{i});
         
         if ~isempty(regexp(InTemp,KeyWord01))
@@ -147,7 +148,14 @@ if nargin ~= 0
             continue
         end
         
-        if strfind(Parallel_info.ConfigurationFileName,([getenv('APPDATA'),'\dragonfly.ini']))
+        if isempty(strfind(InTemp,'.txt'))
+            Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dragonfly.ini']);
+            Parallel_info.ClusterName=OriginalUserInput;
+            continue
+        end
+       
+            
+      %  if strfind(Parallel_info.ConfigurationFileName,([getenv('APPDATA'),'\dragonfly.ini']))
             Parallel_info.ConfigurationFileName=UserInputs{i};
             
             if i<length(UserInputs)
@@ -165,7 +173,7 @@ if nargin ~= 0
                 end
                 Parallel_info.ClusterName=UserInputs{i+1};
             end
-        end
+       % end
     end
 end
 
@@ -180,7 +188,6 @@ end
 if exist('OCTAVE_VERSION'),
     warning('off');
 end
-
 
 [Parallel ErrorCode] = ParallelParser(Parallel_info.ConfigurationFileName,Parallel_info.ClusterName);
 
