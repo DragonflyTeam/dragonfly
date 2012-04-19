@@ -22,7 +22,13 @@ function dyn_waitbar_close(h)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global Parallel_info
 
-if exist('OCTAVE_VERSION') || Parallel_info.console_mode,
+if isempty(Parallel_info),
+    console_mode=0;
+else
+    console_mode=Parallel_info.console_mode;            
+end
+
+if exist('OCTAVE_VERSION') || console_mode,
     clear dyn_waitbar;
     diary on,
     fprintf('\n');

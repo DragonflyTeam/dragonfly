@@ -42,9 +42,15 @@ if nargout,
     h=[];
 end
 
+if isempty(Parallel_info),
+    console_mode=0;
+else
+    console_mode=Parallel_info.console_mode;            
+end
+
 if ~whoiam
     
-    if exist('OCTAVE_VERSION') || Parallel_info.console_mode,
+    if exist('OCTAVE_VERSION') || console_mode,
                 
         if init,
             diary off;
