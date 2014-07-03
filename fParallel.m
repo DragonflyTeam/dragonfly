@@ -1,5 +1,7 @@
 function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
 % PARALLEL CONTEXT
+
+
 % In a parallel context, this function is launched on slave
 % machines, and acts as a wrapper around the function containing the
 % computing task itself.
