@@ -1,7 +1,7 @@
 ## DragonFly Framework Specifications ##
 
 
-DRAGONFLY package is a framework which allows us to parallelize portion of Matlab/Octave codes that require low or not communications between parallel processes. The main idea is to manage with an easy interface the parallel processing for one common parallel paradigm "Embarrassingly parallel". The idea is to split a repetitive structures (nested fucntions) and then to share between all the processes selected for the executions. The processes can be executed in the different core, CPUs or machines considering the computational weight of the machine inside the parallel environment. Then, Drangonfly will assign more or less workload according to the hardware capacity but It is always the user to be responsible to the licenses permission to execute Dragon.... 
+DRAGONFLY package is a framework which allows us to parallelize portion of Matlab/Octave codes that require low or not communications between parallel processes. The main idea is to manage with an easy interface the parallel processing for one common parallel paradigm "Embarrassingly parallel". The idea is to split a repetitive structures (nested functions) and then to share between all the processes selected for the executions. The processes can be executed in the different core, CPUs or machines considering the computational weight of the machine inside the parallel environment. Then, Drangonfly will assign more or less workload according to the hardware capacity but It is always the user to be responsible to the licenses permission to execute Dragonfly.... 
 
 
 
