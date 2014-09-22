@@ -1,0 +1,13 @@
+[cluster]
+Name=Local
+Members=n1
+
+
+[node]
+Name = n1
+ComputerName =localhost
+CPUnbr= [1:8]
+MatlabOctavePath= matlab
+ProgramPath=H:\RMuresano\Dragonfly\Config
+  
+
