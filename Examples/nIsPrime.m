@@ -15,7 +15,7 @@ Replay=1;
 
 % PARALLEL CONTEXT
 % The most computationally intensive part of this function may be executed
-% in parallel. The code sutable to be executed in parallel on multi core or
+% in parallel. The code suitable to be executed in parallel on multi core or
 % cluster machine (in general a 'for' cycle), ...
 
 
