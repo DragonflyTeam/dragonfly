@@ -10,9 +10,12 @@ function InitializeComputationalEnvironment()
 % OUTPUTS
 % None
 %
-% Copyright (C) 2009-2011 Dynare Team
+
+% Copyright (C) 2010-2018 Dynare Team
 %
-% This file is part of Dynare.
+% This file is part of Dynare team
+% Marco Ratto, Ivanno Azzini and Ronal Muresano 
+
 %
 % Dynare is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by

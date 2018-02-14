@@ -14,9 +14,10 @@ function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Parallel)
 % OUTPUTS 
 % o None 
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2010-2018 Dynare Team
 %
-% This file is part of Dynare.
+% This file is part of Dynare team
+% Marco Ratto, Ivanno Azzini and Ronal Muresano 
 %
 % Dynare is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -39,7 +40,7 @@ end
 
 try
     save(['comp_status_',funcName,int2str(njob),'.mat'],'prtfrc','njob','waitbarString','waitbarTitle');
-catch  
+catch
 end
 
 fslave = dir( ['slaveParallel_input',int2str(njob),'.mat']);

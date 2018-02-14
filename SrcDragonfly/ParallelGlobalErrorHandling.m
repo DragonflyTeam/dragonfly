@@ -12,6 +12,10 @@ function [Reaction] = ParallelGlobalErrorHandling(ErrorCode)
 %
 % OUTPUT
 % o   Reaction []                A program error reaction, when necessary.
+% Copyright (C) 2010-2018 Dynare Team
+%
+% This file is part of Dynare team
+% Marco Ratto, Ivanno Azzini and Ronal Muresano 
 
 Reaction=0;
 
