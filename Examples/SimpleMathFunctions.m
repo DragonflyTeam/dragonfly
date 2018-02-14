@@ -53,8 +53,7 @@ variablesForName(3).name='Sum';
 % 'Parallel' exist and is not empty.
 
 % Is it usefull transform it in a matlab script?
-DragonflyOut=DRAGONFLY_Parallel(1,n,variablesForName,FileList);
-
+DragonflyOut=DRAGONFLY_Parallel_Start(1,n,variablesForName,FileList);
 
 for j=1:DragonflyOut.EndFor
     SquareRoot(j)=sqrt(j);
