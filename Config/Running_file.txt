@@ -1,0 +1,15 @@
+[cluster]
+Name=Local
+Members=n1 
+
+[node]
+Name = n1
+ComputerName=localhost
+CPUnbr= [1:4]
+MatlabOctavePath= /home/USER/Matlab/bin/./matlab
+ProgramPath=/home/USER/dragonfly/src/
+RemoteDirectory=/home/USER/dragonfly/src/remote
+SingleCompThread=true
+OperatingSystem=unix
+
+
