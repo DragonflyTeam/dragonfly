@@ -1,4 +1,4 @@
-function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar,Parallel_info,initialize)
+function [fOutVar,nBlockPerCPU,CPUforIndex,totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar,Parallel_info,initialize)
 % PARALLEL CONTEXT
 % This is the most important function for the management of DYNARE parallel
 % computing.
@@ -52,10 +52,17 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 %  o totCPU [int]              total number of CPU used (can be lower than
 %                              the number of CPU declared in "Parallel", if
 %                              the number of required threads is lower)
+%  o CPUforIndex [vector]      thisvariable memorize the " index portion of cycle for"
+%                              performed by each process (CPU,Core) in parallel
+%                              in the form: (StartIndex, EndIndex);
+                               CPUforIndex=zeros(1,2);
 
-% Copyright (C) 2009-2011 Dynare Team
+
+% Copyright (C) 2009-2016 Dynare Team
 %
 % This file is part of Dynare.
+% Developed by Marco Ratto and Ivanno Azzini
+% Modified by Ronal Muresano 2015
 %
 % Dynare is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -242,6 +249,10 @@ for j=1:totCPU,
         
         fblck = offset+1;
         nblck = sum(nBlockPerCPU(1:j));
+            
+        CPUforIndex(j,1)=fblck;
+        CPUforIndex(j,2)=nblck;
+         
         save temp_input.mat fblck nblck fname -append;
         copyfile('temp_input.mat',['slaveJob',int2str(j),'.mat']);
         if Parallel(indPC).Local ==0,
@@ -270,6 +281,13 @@ for j=1:totCPU,
             % Prepare global vars for Slave.
         end
     else
+        
+        fblck = offset+1;
+        nblck = sum(nBlockPerCPU(1:j));
+       
+        CPUforIndex(j,1)=fblck;
+        CPUforIndex(j,2)=nblck;
+        
         
         % If the computation is executed remotely all the necessary files
         % are created localy, then copied in remote directory and then
@@ -305,11 +323,65 @@ for j=1:totCPU,
                     end
                 else    % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                     if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                        command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave -f --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                        command1=['psexec -d -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "cd ',DyMo, '; default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     else
                         command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     end
                 end
+		% HPC cluster implementation
+		if strcmpi('HPC', Parallel(indPC).Type)
+			if strfind([Parallel(indPC).MatlabOctavePath], 'octave')
+
+				% First step: To create the matlab files with the matlab code that will be executed by the node managed by the queeu.
+				File_name=['HPC_process',int2str(j),'.m'];
+				fid_HPC = fopen(File_name,'w+');
+				HPC_Files=['addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''') '];
+				fprintf(fid_HPC,'%s\n',HPC_Files);
+				fclose(fid_HPC);
+
+				% Second step: To create the bash file that call the files created before and add to the ConcurrentCommand.bat file
+				
+				File_name1=['HPC_process',int2str(j),'.sh'];
+				fid_HPC1 = fopen(File_name1,'w+');
+				
+				HPC_command1=['#!/bin/bash'];
+				fprintf(fid_HPC1,'%s\n',HPC_command1);	
+				HPC_command1=['cd ', pwd, '/'];
+				fprintf(fid_HPC1,'%s\n',HPC_command1);	
+				HPC_command1=['octave -q < ', pwd,'/', File_name ];
+				fprintf(fid_HPC1,'%s\n',HPC_command1);	
+				fclose(fid_HPC1);
+				
+				if exist([Parallel(indPC).ProgramPath,'/TemplateCondor'])			
+					% Configuring the queue system files
+					Submit_name=['HPC_dragon',int2str(j)];
+	
+					copyfile([Parallel(indPC).ProgramPath,'/TemplateCondor'],Submit_name); % This file can be copied in the parallel files and then copied to the local directory (Optimization)
+		
+					fid_submit = fopen(Submit_name,'a+');
+					executable= [ 'executable = ', pwd ,'/', File_name1];
+	
+					% Out, Error, log files Condor System 
+	 				fprintf(fid_submit,'%s\n',executable);	
+					fprintf(fid_submit,'output = %s \n',[pwd,'/Logs/HPC_process',int2str(j),'_$(Cluster).$(Process).out']);	
+					fprintf(fid_submit,'log    = %s \n',[pwd,'/Logs/HPC_process',int2str(j),'_$(Cluster).$(Process).log']);	
+					fprintf(fid_submit,'error  = %s \n',[pwd,'/Logs/HPC_process',int2str(j),'_$(Cluster).$(Process).err']);	
+					fprintf(fid_submit,'Queue 1 \n');
+ 					fclose(fid_submit);
+				
+					% Last step: To create the Command.bat file
+
+					command1=['condor_submit ', Submit_name,' &'];
+
+				else
+				   printf('HPC Cluster Execution: File Template is not in the Path, please Verify it \n');
+				   exit 
+				end
+
+			else
+				%TO BE IMPLEMENTED (MATLAB CLUSTERS)
+			end
+		end
             else                                                            % 0.2 Parallel(indPC).Local==0: Run using network on remote machine or also on local machine.
                 if j==nCPU0+1,
                     dynareParallelSendFiles([fname,'_input.mat'],PRCDir,Parallel(indPC));
@@ -338,21 +410,21 @@ for j=1:totCPU,
                     if ~strcmp(Parallel(indPC).ComputerName,MasterName),  % 0.3 Run on a remote machine!
                         % Hybrid computing Matlab(Master)-> Octave(Slaves) and Vice Versa!
                         if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  octave -f --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
                             
-                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                 ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         end
                     else                                                  % 0.4 Run on the local machine via the network
                         % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                         if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  octave -f --eval "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
-                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                            command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                ' -low  ',Parallel(indPC).MatlabOctavePath,cp ' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         end
                     end
                 end
@@ -370,7 +442,7 @@ for j=1:totCPU,
                     end
                 else    % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                     if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                        command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave -f --eval "default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                        command1=['psexec -d -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "cd ',DyMo, '; default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                     else
                         command1=['psexec -d -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                     end
@@ -407,19 +479,19 @@ for j=1:totCPU,
                         if ~strcmp(Parallel(indPC).ComputerName,MasterName), % 1.3 Run on a remote machine.
                             % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                             if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                    ' -low  octave -f --eval "default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                    ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; default_save_options(''-v7'');addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             else
-                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                     ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             end
                         else                                                % 1.4 Run on the local machine via the network.
                             % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                             if  strfind([Parallel(indPC).MatlabOctavePath], 'octave')
-                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                    ' -low  octave -f --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                    ' -low  octave --eval "cd ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\; default_save_options(''-v7''); addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             else
-                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d -i -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
+                                command1=['psexec \\',Parallel(indPC).ComputerName,' -d  -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                     ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).ProgramPath,'''), ',Parallel(indPC).ProgramConfig,'; slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             end
                         end
@@ -449,6 +521,7 @@ end
 
 % In This way we are sure that the file 'ConcurrentCommand1.bat' is
 % closed and then it can be deleted!
+
 while (1)
     StatusOfCC1_bat = fclose(fid);
     if StatusOfCC1_bat==0
@@ -459,6 +532,7 @@ end
 % computing. This is necessary when I want to copy continuously the files produced by
 % the slaves ...
 % If the compuation is 'Local' it is not necessary to do it ...
+
 
 if Strategy==0 || newInstance, % See above.
     PRCDirSnapshot=dynareParallelSnapshot(PRCDir,Parallel(1:totSlaves));
@@ -676,10 +750,7 @@ while (ForEver)
         PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot,'comp_status','.log');
     end
     
-    %     if (flag_CloseAllSlaves==0) || (Strategy == 1) % To avoid some problems of synchronism in OCTAVE!
-    %         PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
-    %     end
-    
+   
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
         HoTuttiGliOutput=0;
         for j=1:totCPU,
@@ -692,8 +763,8 @@ while (ForEver)
         
         if HoTuttiGliOutput==totCPU,
             mydelete(['comp_status_',fname,'*.mat']);
-%           dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel(1:totSlaves));
-%           dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
+           dynareParallelDelete(['comp_status_',fname,'*.mat'],PRCDir,Parallel(1:totSlaves));
+           dynareParallelDelete([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
             if exist('OCTAVE_VERSION')|| (Parallel_info.console_mode == 1),
                 if exist('OCTAVE_VERSION')
                     printf('\n');
@@ -724,6 +795,7 @@ for j=1:totCPU,
     %   dynareParallelGetFiles([fname,'_output_',int2str(j),'.mat'],PRCDir,Parallel(indPC));
     load([fname,'_output_',int2str(j),'.mat'],'fOutputVar');
     delete([fname,'_output_',int2str(j),'.mat']);
+  
     if isfield(fOutputVar,'OutputFileName'),
         %   Already done above
         %   dynareParallelGetFiles([fOutputVar.OutputFileName],PRCDir,Parallel(indPC));
@@ -739,6 +811,7 @@ for j=1:totCPU,
         fOutVar(j)=fOutputVar;
     elseif j==whoiamCloseAllSlaves,
         fOutVar=fOutputVar;
+        
     end
 end
 
@@ -774,9 +847,16 @@ switch Strategy
             end
             
             mydelete(['*_core*_input*.mat']);
-            %             if Parallel(indPC).Local == 1
-            %                 delete(['slaveParallel_input*.mat']);
-            %             end
+            if Parallel(indPC).Local == 1
+                  delete(['slaveParallel_input*.mat']);
+
+		   % deleting all the cluster files Modified by RM
+		  if strcmpi('HPC', Parallel(indPC).Type)
+			if strfind([Parallel(indPC).MatlabOctavePath], 'octave')
+				delete(['HPC_*']);
+		  	end
+		  end
+            end
             
         end
         
