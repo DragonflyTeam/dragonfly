@@ -33,7 +33,7 @@ for i=startFor:endFor
         rI=rI+1;
     end
  end
-DRAGONFLY_Parallel_Block_End(myoutput,'rI','0', 'Replay','1');
+DRAGONFLY_Parallel_Block_End(myoutput,'Replay','1');
 index=sum(rI);
 toc;
 
