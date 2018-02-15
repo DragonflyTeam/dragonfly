@@ -125,6 +125,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
         try,
             tic,
             fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
+            clear(fname);
             toc,
             if isfield(fOutputVar,'OutputFileName'),
                 OutputFileName = fOutputVar.OutputFileName;
