@@ -31,6 +31,7 @@ function closeSlave(Parallel,TmpFolder,partial),
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 if nargin<3,
     partial=0;
 end
@@ -62,7 +63,7 @@ end
 
 for indPC=1:length(Parallel),
     if (Parallel(indPC).Local==0),
-    %    dynareParallelDelete( 'slaveParallel_input*.mat',TmpFolder,Parallel(indPC));
+        dynareParallelDelete( 'slaveParallel_input*.mat',TmpFolder,Parallel(indPC));
     end
     
     % TO FIX ...
@@ -88,4 +89,3 @@ while(1)
 end
 
 s=warning('on');
- 
