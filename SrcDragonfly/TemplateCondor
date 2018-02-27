@@ -1,0 +1,14 @@
+################################################################
+# Submit description file for octave matrix benchmark program  #
+################################################################
+universe       = vanilla
+
+#getenv = True
+machine_count  = 1
+##RunAsOwner  = True
+#requirements   = (Arch == "X86_64" && OpSys == "LINUX")
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+
+

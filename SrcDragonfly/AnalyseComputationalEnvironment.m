@@ -78,7 +78,7 @@ dynareParallelMkDir(RemoteTmpFolder,DataInput);
 % Currently when errors are detected execution simply stops and users can
 % fix configuration errors according to the error type.
 
-% Copyright (C) 2009-2011 Dynare Team
+% Copyright (C) 2010-2016 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -424,9 +424,9 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             end
         else
             if  strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
-                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' Tracing.m']);
+                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,'  -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' Tracing.m']);
             else
-                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -Nodesktop -minimize -r Tracing']);
+                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,'  -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -Nodesktop -minimize -r Tracing']);
             end
         end
         

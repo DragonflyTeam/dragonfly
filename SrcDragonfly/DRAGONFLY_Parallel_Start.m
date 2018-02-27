@@ -72,7 +72,6 @@ else
 end
 
 
-
 %%% VARIABLES MANAGEMENT %%%
 
 % Snapshot of the current state of computing. This step is necessary to
@@ -122,16 +121,25 @@ end
 %%% _core FUNCTION GENERATION %%%
 
 % Retrive information about the function caller.
-fCallerInformation=evalin('caller', 'dbstack(1)');
-fName=fCallerInformation.file;
-fPath=[evalin('caller', 'pwd') '\'];
-fPathAndName=[evalin('caller', 'pwd') '\' fName];
-fID=fopen(fPathAndName);
 
-% Estract code from the function caller.
+% The dbstack has to be reviewed, I don't know why but IK have to do it
+fCallerInformation=evalin('caller', 'dbstack(1)');
+if (strcmp(Parallel.OperatingSystem, 'unix'))
+  fNamestr=strfind(fCallerInformation.file,'/');
+  if ~isempty(fNamestr)
+    fName=fCallerInformation.file((fNamestr(end)+1):end);
+  else
+ 	fName=fCallerInformation.file;
+  end
+  fPathAndName=[evalin('caller', 'pwd') '/' fName];
+else
+  fName=fCallerInformation.file;
+  fPathAndName=[evalin('caller', 'pwd') '\' fName];
+end
+fID=fopen(fPathAndName);
 fContent=fscanf(fID,'%c');
 
-% Remouve the comment in matlab code ...
+% Remove the comment in matlab code ...
 % This step is necessary to remouve the Parallel keywords descriptions.
 warning('OFF');
 fContent=mlstripcommentsstr(fContent);
@@ -161,40 +169,9 @@ if (length(StartLine)>1) && (length(EndLine)>1)
 end
 
 
-% Remove parallel keywords and some space.
+% Remouve parallel keywords and some space.
 parallelBlock=fContent(StartLine:EndLine-1);
-parallelnewBlock=fContent(StartLine:EndLine-1); % To be deleted
-parallelnewBlock=regexprep(parallelnewBlock,' +',' ');
-
-leftexpr= ['[\s(,]',loopVar];
-rightexpr= [loopVar,'[)\s,]'];
-[NonServe left]=regexp(parallelnewBlock,leftexpr);
-[NonServe rigth]=regexp(parallelnewBlock,rightexpr);
-LoopVarOcc=intersect(left,rigth-1);
-Loop_String=['endFor-startFor+1'];
-
-
-for i=1:size(LoopVarOcc,2)
-   if (i==1) 
-      parallelBlockFinal=parallelnewBlock(1:LoopVarOcc(i)-length(loopVar));
-      parallelBlockFinal=[parallelBlockFinal,Loop_String];
-   else
-      parallelBlockFinal=[parallelBlockFinal,parallelnewBlock(LoopVarOcc(i-1)+1:LoopVarOcc(i)-length(loopVar))];
-      parallelBlockFinal=[parallelBlockFinal,Loop_String];
-   end
-end
-
-parallelBlock=[parallelBlockFinal, parallelnewBlock(LoopVarOcc(end)+1:end)];
-
-
-
-
 eL=regexp(parallelBlock,'\n');
-
-
-
-% We have to find the control variable
-
 parallelBlock=parallelBlock(eL(1):eL(end));
 
 % fFor=regexp(parallelBlock,'for');
@@ -267,12 +244,14 @@ end
 for i=1:length(FieldsLoVar)
     r3{i}=[FieldsLoVar{i},'=','myinputs.',FieldsLoVar{i},';\n'];
 end
-
 r3end=['clear myinputs myoutput;\n'];
+
+
 r4=['\nprct={0,whoiam,Parallel(ThisMatlab)};\n'];
 r5=['\nhl = dyn_waitbar(prct,[''Please wait... ''],''Name'', ''Sequential Computing of ...'');\n\n'];
 
-% ParallelBlock is inserted here ...%%%%%%%%%%%%%%%%%%%%%
+% ParallelBlock is inserted here ...
+
 
 r6=['\nVaWo=whos;\n\n'];
 r7=['for i=1:length(VaWo)\n'];
@@ -298,10 +277,7 @@ if isempty(tictocExist)
 end
 
 
-
 CoreCode=([r0,r1,r2,r3{:},r3end,r4,r5,parallelBlock,r6,r7,r8,r9,r10,r11,r12]);
-
-
 
 fid = fopen('DRAGONFLY_core.m', 'w+');
 fprintf(fid,CoreCode, '%s');

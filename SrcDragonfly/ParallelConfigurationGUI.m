@@ -114,6 +114,9 @@ if isempty(Parallel) || isempty(Parallel_info)
     % The contained the "finish.m" file, used to close, if exist
     % the slaves. This code must be execut onfly by "master" Matalab!
     
+    parallelroot = strrep(which('ParallelConfiguration'),'ParallelConfiguration.m','');
+    Parallel_info.parallelroot=parallelroot;
+    % To close the slave ...
     addpath([parallelroot,filesep,'exit_from_parallel']);
 
 end
@@ -188,13 +191,15 @@ end
 
 Parallel_info.ConfigurationFileName=[PathName FileName];
 
+
+Parallel_info.ConfigurationFileName='/home/rmuresano/DragonFly/DragonGit/dragonfly/SrcDragonfly/remote.Rumpa.txt'
 if length(Parallel_info.ConfigurationFileName)<20
     Flag01=1;
     set(handles.editClustersConfigurationFileName, 'String', ([Parallel_info.ConfigurationFileName]));
 else
     Flag01=2;
     TemporaryData01=Parallel_info.ConfigurationFileName;
-    bS=regexp([Parallel_info.ConfigurationFileName],'\');
+    bS=regexp([Parallel_info.ConfigurationFileName],'\/');
     pT=regexp([Parallel_info.ConfigurationFileName],'.txt');
     set(handles.editClustersConfigurationFileName, 'String', ([Parallel_info.ConfigurationFileName(bS(end)+1:pT-1)]));
 end

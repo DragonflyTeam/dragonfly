@@ -484,7 +484,13 @@ Key15(3).SingleCompThread='SingleCompThread =';
 Key15(4).SingleCompThread='SingleCompThread=';
 lKey15=length('SingleCompThread = ');
 
+% Modification to execute in Condor System HPC
 
+Key16(1).Type ='Type = ';
+Key16(2).Type='Type= ';
+Key16(3).Type='Type =';
+Key16(4).Type='Type=';
+lKey16=length('Type = ');
 
 % Parallel data construction.
 
@@ -504,6 +510,8 @@ for i=1:length(MembersName)
     Parallel(i).OperatingSystem='';
     Parallel(i).NodeWeight=1;
     Parallel(i).SingleCompThread='';
+    Parallel(i).Type='';
+
     
     % Extract the node definition.
     Key04Partial=strfind(NodeDefinitions,'[node]');
@@ -955,6 +963,39 @@ for i=1:length(MembersName)
         Parallel(i).SingleCompThread='';
     end
     lKey15=length('SingleCompThread = ');
+
+
+    % Find Key16  HPC Cluster definition.
+    Key16Position=[];
+    for k=1:nOP
+        Key16Position=regexp(NodeBlock,Key16(k).Type);
+        if ~isempty(Key16Position)
+            if k==4
+                lKey16=lKey16-1;
+            end
+            break;
+        end
+    end
+    Key16Position(2:end)=[];
+    
+    if ~isempty(Key16Position)
+        StartPoint=max(find(Key16Position>=NodeBlockEndOfLine));
+        EndPoint=min(find(Key16Position<=NodeBlockEndOfLine));
+        if isempty(EndPoint)
+            Parallel(i).Type=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey16:end);
+        else
+            Parallel(i).Type=NodeBlock(NodeBlockEndOfLine(StartPoint)+lKey16: NodeBlockEndOfLine(EndPoint)-1);
+        end
+        % Remove from the string ' ', '\r', '\n', etc.
+        Parallel(i).Type(isspace(Parallel(i).Type))='';
+        Parallel(i).Type(regexp(Parallel(i).Type,'\n'))='';
+        Parallel(i).Type(regexp(Parallel(i).Type,'\r'))='';
+    end
+    % No string found!
+    if isempty(Parallel(i).Type)
+        Parallel(i).Type='';
+    end
+    lKey16=length('Type = ');
     
     
     

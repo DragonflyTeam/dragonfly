@@ -1,0 +1,95 @@
+[cluster]
+Name=Lion
+Members=n2 n1
+
+[cluster]
+Name=Jaguar
+Members= n1 n2
+
+[cluster]
+Name = Leopard
+Members = n2(5) n1(2)
+
+[cluster]
+Name = Tomcat
+Members = n6
+
+
+
+[node]
+Name = n1
+ComputerName =localhost
+CPUnbr= [1:2]
+MatlabOctavePath= windows
+ProgramPath=C:\DRAGONFLY\parallel   
+
+
+[node]
+Name = n2
+ComputerName =Clare
+CPUnbr = [3:4]
+UserName = xxxxx
+Password= yyyyy
+RemoteDrive= C
+RemoteDirectory = DRAGONFLY\Remote
+ProgramPath = C:\DRAGONFLY\parallel
+ProgramConfig = addpath('C:\DRAGONFLY\Development')
+MatlabOctavePath = octave
+SingleCompThread = false
+OperatingSystem = windows
+
+[node]
+Name = n3
+ComputerName = Brigitta
+CPUnbr = [1:4]
+UserName = xxxxx
+Password = yyyyy
+RemoteDrive= C
+RemoteDirectory = DRAGONFLY\Remote
+ProgramPath = C:\DRAGONFLY\parallel
+ProgramConfig = 
+MatlabOctavePath = octave
+SingleCompThread = false
+OperatingSystem= windows
+
+[node]
+Name = n4
+ComputerName = xxx.yyy.0.1
+CPUnbr = 2
+UserName = xxxxx
+Password= yyyyy
+RemoteDrive=Name
+RemoteDirectory = /.../Remote
+ProgramPath = /.../matlab
+ProgramConfig = 
+MatlabOctavePath = octave
+SingleCompThread = true
+OperatingSystem= unix
+
+[node]
+Name = n5
+ComputerName = xxx.yyy.0.1
+CPUnbr = [3:3]
+UserName = xxxxx
+Password= yyyyy
+RemoteDrive=Name
+RemoteDirectory = /.../Remote
+ProgramPath = /.../matlab
+ProgramConfig = 
+MatlabOctavePath = matlab
+SingleCompThread = true
+OperatingSystem= unix
+
+[node]
+Name = n6
+ComputerName =IAZZ9000
+CPUnbr = 8
+UserName = xxxxx
+Password= yyyyy
+RemoteDrive= C
+RemoteDirectory = Remote
+ProgramPath = C:\Remote
+ProgramConfig =  
+MatlabOctavePath = matlab
+SingleCompThread = false
+OperatingSystem = windows

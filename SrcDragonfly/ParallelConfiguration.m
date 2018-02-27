@@ -76,6 +76,11 @@ if nargin ~= 0
                 disp('Slave(s), closed!');
                 disp(' ');
                 s=warning('on');
+            else
+                disp(' ');
+                disp('There are no open Sloave(s)!');
+                disp(' ');
+                
             end
             return;
         catch
@@ -103,6 +108,7 @@ if nargin ~= 0
     Parallel_info.TestCluster=0;
     
     
+    % Process the user input to find modify respect deafult setting.
     KeyWord01='Console';
     KeyWord01 = lower(KeyWord01);
     KeyWord02='Open';
@@ -112,7 +118,7 @@ if nargin ~= 0
     KeyWord03='Test';
     KeyWord03 = lower(KeyWord03);
     
-    
+    % Take (if exist) the first 5 string from the input. 
     if exist('In1')
         UserInputs{1}=In1;
     end
@@ -129,53 +135,51 @@ if nargin ~= 0
         UserInputs{5}=In5;
     end
     
-    for i=1: length(UserInputs)
+    % Search in the input the above key words.
+    
+    
+    for i=1:length(UserInputs)       
         
-        OriginalUserInput=UserInputs{i};
         InTemp=lower(UserInputs{i});
         
         if ~isempty(regexp(InTemp,KeyWord01))
             Parallel_info.console_mode=1;
+            UserInputs{i}='';
             continue
         end
         
         if ~isempty(regexp(InTemp,KeyWord02)) || ~isempty(regexp(InTemp,KeyWord021))
             Parallel_info.leaveSlaveOpen=1;
+             UserInputs{i}='';;
             continue
         end
         if ~isempty(regexp(InTemp,KeyWord03))
             Parallel_info.TestCluster=1;
+             UserInputs{i}='';;
             continue
         end
-        
-        if isempty(strfind(InTemp,'.txt'))
-            Parallel_info.ConfigurationFileName=([getenv('APPDATA'),'\dragonfly.ini']);
-            Parallel_info.ClusterName=OriginalUserInput;
-            continue
-        end
-       
-            
-      %  if strfind(Parallel_info.ConfigurationFileName,([getenv('APPDATA'),'\dragonfly.ini']))
-            Parallel_info.ConfigurationFileName=UserInputs{i};
-            
-            if i<length(UserInputs)
-                if ~isempty(regexp(lower(UserInputs{i+1}),KeyWord01))
-                    Parallel_info.console_mode=1;
-                    continue
-                end
-                if ~isempty(regexp(lower(UserInputs{i+1}),KeyWord02)) || ~isempty(regexp(lower(UserInputs{i+1}),KeyWord021))
-                    Parallel_info.leaveSlaveOpen=1;
-                    continue
-                end
-                if ~isempty(regexp(lower(UserInputs{i+1}),KeyWord03))
-                    Parallel_info.TestCluster=1;
-                    continue
-                end
-                Parallel_info.ClusterName=UserInputs{i+1};
-            end
-       % end
     end
+    
+    UserInputs(find(strcmp(UserInputs, '')))=[];
+    
+    % Search the input file e cluster name.
+    % Actualy Cluster Name is not used, will be implementend.
+    for i=1:length(UserInputs)
+        InTemp=lower(UserInputs{i});
+        if ~isempty(strfind(InTemp,'.txt'))
+            Parallel_info.ConfigurationFileName=InTemp;
+            UserInputs(i)=[];
+            if ~isempty(UserInputs)
+                % Parallel_info.ClusterName=UserInputs{1};
+                Parallel_info.ClusterName='';
+            end
+            break;
+        end
+    end
+            
 end
+
+
 
 if exist('OCTAVE_VERSION')
     Parallel_info.console_mode=1;

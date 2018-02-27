@@ -1,7 +1,5 @@
 function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
 % PARALLEL CONTEXT
-
-
 % In a parallel context, this function is launched on slave
 % machines, and acts as a wrapper around the function containing the
 % computing task itself.
@@ -22,7 +20,8 @@ function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
 %
 % Copyright (C) 2006-2011 Dynare Team
 %
-% This file is part of Dynare.
+% Developed by Marco Ratto and Ivanno Azzini
+% Modified by Ronal Muresano 2015
 %
 % Dynare is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -43,9 +42,10 @@ funcName=fname;
 
 warning off;
 diary off;
+%a=[fname,'_',int2str(whoiam),'.log']
 
 delete( [fname,'_',int2str(whoiam),'.log']);
-diary( [fname,'_',int2str(whoiam),'.log']);
+diary([fname,'_',int2str(whoiam),'.log']);
 
 % Configure dynare environment.
 % dynareroot = dynare_config();
@@ -97,7 +97,6 @@ try,
             end
         end
     end
-    
     disp(['fParallel ',int2str(whoiam),' completed.'])
 catch,
     theerror = lasterror;
@@ -120,8 +119,8 @@ catch,
     end
     
 end
-diary off;
+%diary off;
+a=pwd;
+disp(['fParallel ',int2str(whoiam),' completed. : ', a])
 delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-
-
 exit;

@@ -8,7 +8,7 @@ function [TiSt] = CreateTimeString()
 %  OUTPUTS
 %  o TiSt    []   ...  
 %
-% Copyright (C) 2009-2010 Dynare Team
+% Copyright (C) 2010-2018 Dynare Team
 %
 % This file is part of Dynare.
 %
