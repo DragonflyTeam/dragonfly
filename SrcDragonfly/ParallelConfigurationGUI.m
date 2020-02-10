@@ -191,8 +191,6 @@ end
 
 Parallel_info.ConfigurationFileName=[PathName FileName];
 
-
-Parallel_info.ConfigurationFileName='/home/rmuresano/DragonFly/DragonGit/dragonfly/SrcDragonfly/remote.Rumpa.txt'
 if length(Parallel_info.ConfigurationFileName)<20
     Flag01=1;
     set(handles.editClustersConfigurationFileName, 'String', ([Parallel_info.ConfigurationFileName]));
