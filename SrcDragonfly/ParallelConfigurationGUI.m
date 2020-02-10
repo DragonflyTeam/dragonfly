@@ -430,7 +430,7 @@ try
 catch
     s=warning('on');
     disp(' ');
-    disp('Some error(s)occurred while try to close the "Slaves"!');
+    disp('Some error(s) occurred while try to close the "Slaves"!');
     disp(' ');
 end
 
@@ -524,7 +524,7 @@ if ~isempty(Parallel)
     end
     if ~isempty(Parallel_info)
         disp(' ');
-        disp('Addidiotanl Information:');
+        disp('Additional Information:');
         disp(' ');
         disp([Parallel_info]);
         disp(' ');
