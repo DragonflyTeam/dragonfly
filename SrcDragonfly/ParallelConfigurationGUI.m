@@ -191,8 +191,6 @@ end
 
 Parallel_info.ConfigurationFileName=[PathName FileName];
 
-
-Parallel_info.ConfigurationFileName='/home/rmuresano/DragonFly/DragonGit/dragonfly/SrcDragonfly/remote.Rumpa.txt'
 if length(Parallel_info.ConfigurationFileName)<20
     Flag01=1;
     set(handles.editClustersConfigurationFileName, 'String', ([Parallel_info.ConfigurationFileName]));
@@ -432,7 +430,7 @@ try
 catch
     s=warning('on');
     disp(' ');
-    disp('Some error(s)occurred while try to close the "Slaves"!');
+    disp('Some error(s) occurred while try to close the "Slaves"!');
     disp(' ');
 end
 
@@ -526,7 +524,7 @@ if ~isempty(Parallel)
     end
     if ~isempty(Parallel_info)
         disp(' ');
-        disp('Addidiotanl Information:');
+        disp('Additional Information:');
         disp(' ');
         disp([Parallel_info]);
         disp(' ');
@@ -547,10 +545,7 @@ function Edit_Callback(hObject, eventdata, handles)
 global  Parallel_info
 
 if isfield(Parallel_info, 'ConfigurationFileName')
-    
-    if(ispc)
-        [NonServeL NonServeR]=system (['notepad ', Parallel_info.ConfigurationFileName]);
-    end
+    edit(Parallel_info.ConfigurationFileName);
 else
     disp(' ');
     disp('There are no file to edit!');
