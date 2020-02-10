@@ -545,10 +545,7 @@ function Edit_Callback(hObject, eventdata, handles)
 global  Parallel_info
 
 if isfield(Parallel_info, 'ConfigurationFileName')
-    
-    if(ispc)
-        [NonServeL NonServeR]=system (['notepad ', Parallel_info.ConfigurationFileName]);
-    end
+    edit(Parallel_info.ConfigurationFileName);
 else
     disp(' ');
     disp('There are no file to edit!');
