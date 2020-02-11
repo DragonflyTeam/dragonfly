@@ -169,7 +169,7 @@ if (length(StartLine)>1) && (length(EndLine)>1)
 end
 
 
-% Remouve parallel keywords and some space.
+% Remove parallel keywords and some space.
 parallelBlock=fContent(StartLine:EndLine-1);
 eL=regexp(parallelBlock,'\n');
 parallelBlock=parallelBlock(eL(1):eL(end));
