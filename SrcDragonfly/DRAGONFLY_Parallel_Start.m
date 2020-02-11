@@ -289,19 +289,18 @@ disp('Go Parallel ...');
 disp(' ');
 
 
-[fout, nBlockPerCPU, totCPU] = masterParallel(Parallel, startFor, endFor,NamFileInput,'DRAGONFLY_core', localVars, globalVars,Parallel_info);
+[fout, nBlockPerCPU, totCPU, CPUforIndex] = masterParallel(Parallel, startFor, endFor,NamFileInput,'DRAGONFLY_core', localVars, globalVars,Parallel_info);
 
 % Compact the information returned by masterParallel ...
 AddOutInf=struct;
-AddOutInf=setfield(AddOutInf,'nBlockPerCPU',nBlockPerCPU);
-AddOutInf=setfield(AddOutInf,'totCPU',totCPU);
+AddOutInf.nBlockPerCPU=nBlockPerCPU;
+AddOutInf.totCPU=totCPU;
+AddOutInf.CPUforIndex=CPUforIndex;
 
 
 foutEnlarged=struct;
-
-foutEnlarged=setfield(foutEnlarged,'fout',fout);
-foutEnlarged=setfield(foutEnlarged,'AddOutInf',AddOutInf);
-
+foutEnlarged.fout=fout;
+foutEnlarged.AddOutInf=AddOutInf;
 
 
 % Reshape the result of parallell remote/locale computation ...

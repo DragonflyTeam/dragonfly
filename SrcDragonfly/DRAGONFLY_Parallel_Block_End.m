@@ -60,7 +60,7 @@ end
 if nargin>1
     
     totCPU=foutEnlarged.AddOutInf.totCPU;
-%    CPUforIndex=foutEnlarged.AddOutInf.CPUforIndex;
+    CPUforIndex=foutEnlarged.AddOutInf.CPUforIndex;
     
     jSlaveData=[];
     
@@ -135,13 +135,13 @@ if nargin>1
                 case 4 % USER CUSTOM
                     
                     % Slaves return less data than requested, or required
-                    % data are distribuited in different manner respect
-                    % CPUforIndex suddivision. For example in
-                    % FindAllPrimeNumbersLessThan.m
+                    % data are distribuited in a different manner with
+                    % respect to CPUforIndex split.
+                    % For example in FindAllPrimeNumbersLessThan.m
                     
                      if (strcmp(varargin{i+1},'0')) % Concatenating the Data in row format
                           ReshapedUserData=[];
-                         for j=1:size(foutEnlarged.AddOutInf.totCPU,1)
+                         for j=1:totCPU
                             partial=foutEnlarged.fout(j).([varargin{i}]);
                             if (size(partial, 2) > 1)
                                 ReshapedUserData=[ReshapedUserData;partial(foutEnlarged.fout(j).startFor:foutEnlarged.fout(j).endFor,:)];
@@ -151,7 +151,7 @@ if nargin>1
                         end
                     else  % Concatenating the Data in Colum format
                          ReshapedUserData=[];
-                         for j=1:size(foutEnlarged.AddOutInf.totCPU,1)
+                         for j=1:totCPU
                             partial=foutEnlarged.fout(j).([varargin{i}]);
                             if (size(partial, 1) > 1) 
                                 ReshapedUserData=[ReshapedUserData partial(foutEnlarged.fout(j).startFor:foutEnlarged.fout(j).endFor,:)];

@@ -1,4 +1,4 @@
-function [fOutVar,nBlockPerCPU,CPUforIndex,totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar,Parallel_info,initialize)
+function [fOutVar,nBlockPerCPU,totCPU,CPUforIndex] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar,Parallel_info,initialize)
 % PARALLEL CONTEXT
 % This is the most important function for the management of DYNARE parallel
 % computing.
@@ -52,10 +52,9 @@ function [fOutVar,nBlockPerCPU,CPUforIndex,totCPU] = masterParallel(Parallel,fBl
 %  o totCPU [int]              total number of CPU used (can be lower than
 %                              the number of CPU declared in "Parallel", if
 %                              the number of required threads is lower)
-%  o CPUforIndex [vector]      thisvariable memorize the " index portion of cycle for"
+%  o CPUforIndex [vector]      this variable stores the " index portion of cycle for"
 %                              performed by each process (CPU,Core) in parallel
 %                              in the form: (StartIndex, EndIndex);
-                               CPUforIndex=zeros(1,2);
 
 
 % Copyright (C) 2009-2016 Dynare Team
@@ -210,6 +209,7 @@ end
 % keyboard
 
 % End
+CPUforIndex=zeros(totCPU,2);
 
 for j=1:totCPU,
     
