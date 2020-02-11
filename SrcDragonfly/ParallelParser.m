@@ -890,7 +890,7 @@ for i=1:length(MembersName)
     
     strTemp=Parallel(i).MatlabOctavePath;
     
-    if isempty(strfind(strTemp,'matlab')) && isempty(strfind(strTemp,'octave'))
+    if isempty(strfind(strTemp,'matlab')) && isempty(strfind(strTemp,'MATLAB'))&& isempty(strfind(strTemp,'octave'))
         ErrorCode=11;
         Reaction=ParallelGlobalErrorHandling(ErrorCode);
         return

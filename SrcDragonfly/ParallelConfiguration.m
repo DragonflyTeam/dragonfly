@@ -208,6 +208,7 @@ parallelroot = strrep(which('ParallelConfiguration'),'ParallelConfiguration.m','
 Parallel_info.parallelroot=parallelroot;
 % To close the slave ...
 addpath([parallelroot,filesep,'exit_from_parallel']);
+addpath([parallelroot,'..', filesep, 'util']);
 
 % This is simple and check!
 % The default value for the field MatlabOctavePath now is 'matlab' or

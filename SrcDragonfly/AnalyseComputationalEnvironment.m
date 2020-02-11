@@ -31,6 +31,10 @@ function [ErrorCode] = AnalyseComputationalEnvironment(DataInput, DataInputAdd)
 %   field RemoteTmpFolder (the temporary directory created/destroyed on remote
 %   computer) is used.
 
+if ispc
+    [tempo, MasterName]=system('hostname');
+    MasterName=deblank(MasterName);
+end
 
 RemoteTmpFolder=DataInputAdd.RemoteTmpFolder;
 dynareParallelMkDir(RemoteTmpFolder,DataInput);
@@ -54,6 +58,7 @@ dynareParallelMkDir(RemoteTmpFolder,DataInput);
 %               see http://www.dynare.org/DynareWiki/ParallelDynare.
 %         2.1   [warning] The user asks to use more CPU's than those available.
 %         2.2   [warning] There are unused CPU's!
+%        
 %
 %
 %   Value 3:    The remote computer is unreachable!!!
@@ -109,16 +114,20 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     OScallerUnix=~ispc;
     OScallerWindows=ispc;
     OStargetUnix=strcmpi('unix',DataInput(Node).OperatingSystem);
+    if isempty(DataInput(Node).OperatingSystem)
+        OStargetUnix=OScallerUnix;
+    end
     OStargetWindows=strcmpi('windows',DataInput(Node).OperatingSystem);
-    
+    if isempty(DataInput(Node).OperatingSystem)
+        OStargetWindows=OScallerWindows;
+    end
+
     Environment= (OScallerUnix || OStargetUnix);
-    
-    disp(' ');
-    disp(' ');
+
+    skipline(2)
     disp(['Testing computer -> ',DataInput(Node).ComputerName,' <- ...']);
-    disp(' ');
-    disp(' ');
-    
+    skipline(2)
+
     % The function is composed by two main blocks, determined by the 'Local'
     % variable.
     
@@ -128,15 +137,12 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     if ((DataInput(Node).Local == 0) |(DataInput(Node).Local == 1))
         % Continue it is Ok!
         disp('Check on Local Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        
+        skipline()
     else
         disp('The variable "Local" has a bad value!');
-        disp(' ');
+        skipline()
         disp('ErrorCode 1.');
-        disp(' ');
-        disp(' ');
+        skipline()
         ErrorCode=1;
         return
         
@@ -179,17 +185,14 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         end
         
         if (si1)
-            disp(['It is impossibile to be connected to the computer with name "',DataInput(Node).ComputerName,'" using the network!']);
-            disp(' ');
-            disp('ErrorCode 3.');
+            disp(['It is impossibile to ping to the computer with name "',DataInput(Node).ComputerName,'" using the network!'])
+            skipline()
+            disp('ErrorCode 3.')
             ErrorCode=3;
-            disp(' ');
-            disp(' ');
-            return;
+            skipline(2)
         else
-            disp('Check on ComputerName Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
+            disp('Check on ComputerName Variable ..... Ok!')
+            skipline(2)
         end
         
         
@@ -202,35 +205,30 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             % strategy.
             
             if (isempty(DataInput(Node).UserName))
-                disp('The fields UserName is empty!');
-                disp(' ');
-                disp('ErrorCode 4.');
-                disp(' ');
-                disp(' ');
+                disp('The fields UserName is empty!')
+                skipline()
+                disp('ErrorCode 4.')
+                skipline(2)
                 ErrorCode=4;
                 return
             end
-            disp('Check on UserName Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
-            
+            disp('Check on UserName Variable ..... Ok!')
+            skipline(2)
+
             % This check can be removed ... according to the dynare parser
-            % strategy.           
-                if (~isempty(DataInput(Node).Password))
-                    disp('[WARNING] The field Password should be empty under unix or mac!');
-                    disp(' ');
-                    disp(['Remove the string ',DataInput(Node).Password,' from this field!']);
-                    disp(' ');
-                    disp('ErrorCode 4.');
-                    disp(' ');
-                    disp(' ');
-                    ErrorCode=4;
-                    %                 return
-                else
-                    disp('Check on Password Variable ..... Ok!');
-                    disp(' ');
-                    disp(' ');
-                end
+            % strategy.
+            if (~isempty(DataInput(Node).Password))
+                disp('[WARNING] The field Password should be empty under unix or mac!');
+                skipline()
+                disp(['Remove the string ',DataInput(Node).Password,' from this field!'])
+                skipline()
+                disp('ErrorCode 4.')
+                skipline(2)
+                ErrorCode=4;
+            else
+                disp('Check on Password Variable ..... Ok!')
+                skipline(2)
+            end
         else
             
             % This check can be removed ... according to the dynare parser
@@ -238,20 +236,16 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             
             if (isempty(DataInput(Node).UserName)) || (isempty(DataInput(Node).Password))
                 disp('The fields UserName and/or Password are/is empty!');
-                disp(' ');
-                disp('ErrorCode 4.');
-                disp(' ');
-                disp(' ');
+                skipline()
+                disp('ErrorCode 4.')
+                skipline(2)
                 ErrorCode=4;
                 return
             end
             disp('Check on UserName Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
+            skipline()
             disp('Check on Password Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
-            
+            skipline()
         end
         
         % Now we very if RemoteDrive and/or RemoteDirectory exist on remote
@@ -263,62 +257,60 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             % strategy.
             
             if  isempty(DataInput(Node).RemoteDirectory)
-                disp('The field RemoteDirectory is empty!');
-                disp(' ');
-                disp('ErrorCode 5.');
-                disp(' ');
-                disp(' ');
+                disp('The field RemoteDirectory is empty!')
+                skipline()
+                disp('ErrorCode 5.')
+                skipline()
                 ErrorCode=5;
                 return
             end
             
             % This check can be removed ... according to the dynare parser
             % strategy.
-            
-                if (~isempty(DataInput(Node).RemoteDrive))
-                    disp('[WARNING] The fields RemoteDrive should be empty under unix or mac!');
-                    disp(' ');
-                    disp(['remove the string ',DataInput(Node).RemoteDrive,' from this field!']);
-                    disp(' ');
-                    disp('ErrorCode 5.');
-                    disp(' ');
-                    disp(' ');
-                    ErrorCode=5;
-                    %                 return
-                end
-            
+
+            if (~isempty(DataInput(Node).RemoteDrive))
+                disp('[WARNING] The fields RemoteDrive should be empty under unix or mac!')
+                skipline()
+                disp(['remove the string ',DataInput(Node).RemoteDrive,' from this field!'])
+                skipline()
+                disp('ErrorCode 5.')
+                skipline(2)
+                ErrorCode=5;
+            end
+
             si2=[];
             de2=[];
-            
-            [si2 de2]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' ls ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,'/']);
-            
+            if ~isempty(DataInput(Node).Port)
+                ssh_token = ['-p ',DataInput(Node).Port];
+            else
+                ssh_token = '';
+            end
+
+            [si2 de2]=system(['ssh ',ssh_token,' ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' ls ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,'/']);
+
             if (si2)
-                disp ('Remote Directory does not exist or is not reachable!');
-                disp(' ');
-                disp('ErrorCode 5.');
-                disp(' ');
-                disp(' ');
+                disp ('Remote Directory does not exist or is not reachable!')
+                skipline()
+                disp('ErrorCode 5.')
+                skipline(2)
                 ErrorCode=5;
                 return
             end
-            
-            disp('Check on RemoteDirectory Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
-            disp('Check on RemoteDrive Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
-            
+
+            disp('Check on RemoteDirectory Variable ..... Ok!')
+            skipline(2)
+            disp('Check on RemoteDrive Variable ..... Ok!')
+            skipline(2)
+
         else
             % This check can be removed ... according to the dynare parser
             % strategy.
             
             if (isempty(DataInput(Node).RemoteDrive)||isempty(DataInput(Node).RemoteDirectory))
-                disp('Remote RemoteDrive and/or RemoteDirectory is/are empty!');
-                disp(' ');
-                disp('ErrorCode 5.');
-                disp(' ');
-                disp(' ');
+                disp('Remote RemoteDrive and/or RemoteDirectory is/are empty!')
+                skipline()
+                disp('ErrorCode 5.')
+                skipline(2)
                 ErrorCode=5;
                 return
             end
@@ -326,24 +318,21 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
             
             si2=[];
             de2=[];
-            [s12 de2]=system(['dir \\',DataInput(Node).ComputerName,'\',DataInput(Node).RemoteDrive,'$\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder]);
-            
+            [si2 de2]=system(['dir \\',DataInput(Node).ComputerName,'\',DataInput(Node).RemoteDrive,'$\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder]);
+
             if (si2)
-                disp ('Remote Directory does not exist or it is not reachable!');
-                disp(' ');
-                disp('ErrorCode 5.');
-                disp(' ');
-                disp(' ');
+                disp ('Remote Directory does not exist or it is not reachable!')
+                skipline()
+                disp('ErrorCode 5.')
+                skipline(2)
                 ErrorCode=5;
                 return
             end
             
-            disp('Check on RemoteDirectory Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
+            disp('Check on RemoteDirectory Variable ..... Ok!')
+            skipline(2)
             disp('Check on RemoteDrive Variable ..... Ok!');
-            disp(' ');
-            disp(' ');
+            skipline(2)
             
         end
         
@@ -398,17 +387,15 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         delete('Tracing.m');
         
         if (isempty(FindTracing))
-            disp ('It is impossible to exchange data with Remote Drive and/or Remote Directory! ErrorCode 6.');
-            disp(' ');
-            disp('ErrorCode 6.');
-            disp(' ');
-            disp(' ');
+            disp('It is impossible to exchange data with Remote Drive and/or Remote Directory! ErrorCode 6.')
+            skipline()
+            disp('ErrorCode 6.')
+            skipline(2)
             ErrorCode=6;
             return
         else
-            disp('Check on Exchange File with Remote Computer ..... Ok!');
-            disp(' ');
-            disp(' ');
+            disp('Check on Exchange File with Remote Computer ..... Ok!')
+            skipline(2)
         end
         
         
@@ -417,17 +404,31 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         % the path is MatlabOctavePath.
         
         if Environment
-            if strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
-                system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' Tracing.m;" &']);
+            if ~isempty(DataInput(Node).Port)
+                ssh_token = ['-p ',DataInput(Node).Port];
             else
-                system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -Nodesktop -minimize -r Tracing;" &']);
+                ssh_token = '';
+            end
+            if strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
+                system(['ssh ',ssh_token,' ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' Tracing.m;" &']);
+            else
+                system(['ssh ',ssh_token,' ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -nodesktop -minimize -r Tracing;" &']);
             end
         else
-            if  strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
-                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,'  -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' Tracing.m']);
-            else
-                [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,'  -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -Nodesktop -minimize -r Tracing']);
+            if ~strcmp(DataInput(Node).ComputerName,MasterName) % run on remote machine
+                if  strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
+                    [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' Tracing.m']);
+                else
+                    [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -nodesktop -minimize -r Tracing']);
+                end
+            else % run on local machine via the network: user and passwd cannot be used!
+                if  strfind([DataInput(Node).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
+                    [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e ',' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' Tracing.m']);
+                else
+                    [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e ',' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -nodesktop -minimize -r Tracing']);
+                end
             end
+
         end
         
         % Timer da fissare, nei valori di attesa!
@@ -436,17 +437,18 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         
         if t1(5)+1>60;
             t2=2;
-        else t2=t1(5)+1;
+        else
+            t2=t1(5)+1;
         end
         
         Flag=0;
         
         while (1);
             if Flag==0
-                disp('Try to run matlab/octave on remote machine ... ');
-                disp(' ');
-                disp('please wait ... ');
-                disp(' ');
+                disp('Try to run matlab/octave on remote machine ... ')
+                skipline()
+                disp('please wait ... ')
+                skipline()
                 Flag=1;
             end
             nt=fix(clock);
@@ -462,21 +464,19 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         end
         
         if  (ErrorCode==7)
-            
-            disp ('It is not possible execute a matlab session on remote machine!');
-            disp(' ');
-            disp('ErrorCode 7.');
-            disp(' ');
-            disp(' ');
+
+            disp ('It is not possible execute a matlab session on remote machine!')
+            skipline()
+            disp('ErrorCode 7.')
+            skipline(2)
             ErrorCode=7;
             dynareParallelRmDir(RemoteTmpFolder,DataInput(Node));
             return
             
         else
-            disp('Check on MatlabOctave Path and MatlabOctave Program Execution on remote machine ..... Ok!');
-            disp(' ');
-            disp(' ');
-            
+            disp('Check on MatlabOctave Path and MatlabOctave Program Execution on remote machine ..... Ok!')
+            skipline(2)
+
             % Now we verify if the DynarePath is correct ...
             disp('Check the Program path on remote machine ... ');
             disp(' ');
@@ -578,17 +578,37 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     
     si0=[];
     de0=[];
-    
+
+    Environment1=Environment;
     disp('Checking Hardware please wait ...');
     if (DataInput(Node).Local == 1)
-        if Environment,
-            [si0 de0]=system('grep processor /proc/cpuinfo');
+        if Environment
+            if ~ismac
+                [si0 de0]=system('grep processor /proc/cpuinfo');
+            else
+                [si0 de0]=system('sysctl -n hw.ncpu');
+                Environment1=2;
+            end
         else
             [si0 de0]=system(['psinfo \\']);
         end
     else
-        if Environment,
-            [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
+        if Environment
+            if ~isempty(DataInput(Node).Port)
+                ssh_token = ['-p ',DataInput(Node).Port];
+            else
+                ssh_token = '';
+            end
+            if OStargetUnix
+                if RemoteEnvironment ==1
+                    [si0 de0]=system(['ssh ',ssh_token,' ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
+                else % it is MAC
+                    [si0 de0]=system(['ssh ',ssh_token,' ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' sysctl -n hw.ncpu']);
+                    Environment1=2;
+                end
+            else
+                [si0 de0]=system(['ssh ',ssh_token,' ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' psinfo']);
+            end
         else
             [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName,' -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password]);
         end
@@ -596,13 +616,14 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     
     
     RealCPUnbr='';
-    RealCPUnbr=GiveCPUnumber(de0);
-    
+    %    keyboard;
+    RealCPUnbr=GiveCPUnumber(de0,Environment1);
+
     % Questo controllo penso che si possa MIGLIORARE!!!!!
-    if  isempty (RealCPUnbr) && Environment==0,
+    if  isempty (RealCPUnbr) && Environment1==0
         [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName]);
-    end        
-    RealCPUnbr=GiveCPUnumber(de0);
+    end
+    RealCPUnbr=GiveCPUnumber(de0,Environment1);
 
     if  isempty (RealCPUnbr)
         % An error occurred when we try to know the Cpu/Cores
@@ -655,12 +676,9 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         ErrorCode=2.2;
         % return
     end
-    
-    disp(['Test for Cluster computation, computer ',DataInput(Node).ComputerName, ' ..... Passed!']);
-    disp(' ');
-    disp(' ');
-    
-    
-end
 
-return
+    
+
+    disp(['Test for Cluster computation, computer ',DataInput(Node).ComputerName, ' ..... Passed!'])
+    skipline(2)
+end
