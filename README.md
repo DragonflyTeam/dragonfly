@@ -25,7 +25,7 @@ Ratto, M., Azzini, I., Bastani, H., Villemot, S., Beta-version of parallel routi
 #License 
 
 Most of the source files are covered by the GNU General Public Licence version
-3 or later (there are some exceptions to this, see [license.txt](license.txt) in
+3 or later (there are some exceptions to this, see [license.txt](license.txt))
 
 
 
