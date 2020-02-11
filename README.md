@@ -7,11 +7,8 @@ The DRAGONFLY package is a framework which allows to parallelize portions of Mat
 
 ***References:***
 
-*Azzini I., Girardi R. and Ratto M., Parallelization of Matlab codes under Windows platform for Bayesian estimation: A Dynare application, DYNARE CONFERENCE September 10-11, 2007 Paris School of Economics.*
-
-*Azzini I., Ratto M., Parallel DYNARE Toolbox, 17th International Conference on Computing in Economics and Finance (CEF 2011). Society for Computational Economics Sponsored by the Federal Reserve Bank of San Francisco, June 29 through July 1, 2011.
-
-Ratto, M., Report on alternative algorithms efficiency on different hardware specifications and Alpha-version of parallel routines, (2010) MONFISPOL Grant no.: 225149, Deliverable 2.2.1, March 31, 2010.
+Azzini, I., Muresano, R., Ratto, M. Dragonfly: A multi-platform parallel toolbox for MATLAB/Octave, Computer Languages, Systems & Structures, 52, 2018, 21-42. 
+https://doi.org/10.1016/j.cl.2017.10.002
 
 Ratto, M., Azzini, I., Bastani, H., Villemot, S., Beta-version of parallel routines: user manual, (2011) MONFISPOL Grant no.: 225149, Deliverable 2.2.2, July 8, 2011.*
 
